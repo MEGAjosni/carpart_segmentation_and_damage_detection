@@ -25,7 +25,7 @@ for filename in os.listdir(folder):
     arr = arr[0:3]
     arr = np.transpose(arr, (1,2,0))
     
-    plt.imshow(arr.astype(uint8))
+    plt.imshow(arr.astype(np.uint8))
     plt.show()
     
     #img = Image.fromarray(arr, 'RGB')
