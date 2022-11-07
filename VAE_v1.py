@@ -44,7 +44,8 @@ class VAE(nn.Module):
         self.deconv1=nn.ConvTranspose2d(in_channels=12,out_channels=6,kernel_size=4)
         
     def forward(self,x):
-        out=nn.ReLU(self.conv1(x))
+        #out=nn.ReLU(self.conv1(x))
+        out=self.conv1(x)
         size1 = out.size()
         out,indices1=self.maxpool1(out)
         out=nn.ReLU(self.conv2(out))
@@ -58,7 +59,9 @@ class VAE(nn.Module):
         out=self.maxunpool2(out,indices1,size1)
         out=nn.ReLU(self.deconv3(out))
         return(out)
-        
+    
+vae = VAE(in_channels=3,out_channels=1)
+
         
         
         
