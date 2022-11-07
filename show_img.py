@@ -22,7 +22,7 @@ for filename in os.listdir(folder):
     
     plt.show()
     
-    #break
+    break
     #sleep(2)
     
     
