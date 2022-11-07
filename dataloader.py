@@ -9,8 +9,6 @@ class CarDataset(Dataset):
     def __init__(self, directory):
         # Load data
         
-        directory = "C:/Users/jonas/Downloads/data/clean_data/train_data"
-        
         x = []
         y = []
         
@@ -37,9 +35,8 @@ class CarDataset(Dataset):
         return self.n_samples
 
 
-batchsize = 10
-
 dataset = CarDataset()
-dataloader = DataLoader(dataset=dataset, batch_size=batchsize, shuffle=True)
 
+batchsize = 10
+dataloader = DataLoader(dataset=dataset, batch_size=batchsize, shuffle=True)
 dataiter = iter(dataloader)
