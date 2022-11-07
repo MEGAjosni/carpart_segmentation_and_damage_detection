@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import os
 
-
+folder  = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
 class CarDataset(Dataset):
     
     def __init__(self, directory):
@@ -35,8 +35,12 @@ class CarDataset(Dataset):
         return self.n_samples
 
 
-dataset = CarDataset()
+dataset = CarDataset(directory = folder)
 
 batchsize = 10
 dataloader = DataLoader(dataset=dataset, batch_size=batchsize, shuffle=True)
 dataiter = iter(dataloader)
+
+#%%
+
+images,labels = next(dataiter)
