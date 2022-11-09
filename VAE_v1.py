@@ -45,7 +45,7 @@ class VAE(nn.Module):
         self.maxunpool2=nn.MaxUnpool2d(kernel_size=2)
         
         #De Convolution 3
-        self.deconv1=nn.ConvTranspose2d(in_channels=12,out_channels=6,kernel_size=4)
+        self.deconv3=nn.ConvTranspose2d(in_channels=6,out_channels=1,kernel_size=4)
         
     def forward(self,x):
         out=(self.conv1(x))
@@ -66,7 +66,7 @@ class VAE(nn.Module):
         return(out)
     
 vae = VAE(in_channels=3,out_channels=1)
-
+vae.double()
 
 #%% Marcus CHAD net
 
