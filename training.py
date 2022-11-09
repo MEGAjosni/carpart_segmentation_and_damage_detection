@@ -21,8 +21,8 @@ if user == 'Marcus':
     train_folder = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
     test_folder = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\test_data"
 elif user == 'Alek':
-    train_folder = r"C:\Users\aleks\OneDrive\Skrivebord\clean_data\train_data"
-    test_folder = r"C:\Users\aleks\OneDrive\Skrivebord\clean_data\test_data"
+    train_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\train_data"
+    test_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\test_data"
 elif user == 'Jonas':
     folder = 'hej'
 
