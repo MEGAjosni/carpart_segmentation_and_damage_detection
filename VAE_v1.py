@@ -138,6 +138,6 @@ net.double()
 
 #%%
 
-net(images)
+#net(images)
         
         
