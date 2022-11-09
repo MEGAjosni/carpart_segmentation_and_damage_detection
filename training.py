@@ -79,15 +79,7 @@ def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=20, val
                         test_loss.append(loss.item())
         
                     
-                    plt.imshow(labels[idx][0])
-                    plt.title("True")
-                    plt.show()
-                    #with torch.no_grad():
-                    vae.cpu()
-                    pred = vae(images)[0][0]
-                    plt.imshow(pred.numpy())
-                    plt.title("pred")
-                    plt.show()
+                    plotfun(images,labels,1)
         
                     model.train()
                     
@@ -117,12 +109,15 @@ train_NN(vae,train_loader,test_loader,batch_size=batchsize,validation_every_step
 #%%
 images,labels = next(iter(test_loader))
 idx = 3
-plt.imshow(labels[idx][0])
-plt.title("True")
-plt.show()
-with torch.no_grad():
-    vae.cpu()
-    pred = vae(images)[0][0]
-    plt.imshow(pred.numpy())
-    plt.title("pred")
+def plotfun(images,labels,idx)
+    plt.imshow(labels[idx][0])
+    plt.title("True")
     plt.show()
+    with torch.no_grad():
+        vae.cpu()
+        pred = vae(images)[0][0]
+        plt.imshow(pred.numpy())
+        plt.title("pred")
+        plt.show()
+        
+plotfun(images,labels,idx)
