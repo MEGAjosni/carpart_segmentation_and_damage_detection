@@ -3,7 +3,16 @@ from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import os
 
-folder  = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
+user = 'Marcus'
+
+if user == 'Marcus':
+    folder  = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
+elif user == 'Alek':
+    folder  = r"C:\Users\aleks\OneDrive\Skrivebord\clean_data\train_data"
+elif user == 'Jonas':
+    folder = 'hej'
+
+
 class CarDataset(Dataset):
     
     def __init__(self, directory):
