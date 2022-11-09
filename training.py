@@ -13,8 +13,17 @@ import numpy as np
 def accuracy(target, pred):
     return metrics.accuracy_score(target.detach().cpu().numpy(), pred.detach().cpu().numpy())
 
-train_folder = r"C:\Users\aleks\OneDrive\Skrivebord\clean_data\train_data"
-test_folder = r"C:\Users\aleks\OneDrive\Skrivebord\clean_data\test_data"
+
+user = 'Marcus'
+
+if user == 'Marcus':
+    train_folder = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
+    test_folder = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\test_data"
+elif user == 'Alek':
+    train_folder = r"C:\Users\aleks\OneDrive\Skrivebord\clean_data\train_data"
+    test_folder = r"C:\Users\aleks\OneDrive\Skrivebord\clean_data\test_data"
+elif user == 'Jonas':
+    folder = 'hej'
 
 #%% Training
 
@@ -50,9 +59,9 @@ def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=100, va
     
             # Increment step counter
             step += 1
-            print(step,batch_loss)
+            print(step,batch_loss.item())
             
-            train_loss.append(batch_loss)
+            train_loss.append(batch_loss.item())
             
             if step % validation_every_steps == 0:
                 
@@ -65,15 +74,15 @@ def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=100, va
                         output = model(inputs)
                         loss = loss_fn(output, targets)
                         
-                        test_loss.append(loss)
+                        test_loss.append(loss.item())
         
     
                     model.train()
                     
                 # Append average validation accuracy to list.
          
-                print(f"Step {step:<5}   training loss: {batch_loss[-1]}")
-                print(f"             test loss: {loss[-1]}")
+                print(f"Step {step:<5}   training loss: {batch_loss.item()}")
+                print(f"             test loss: {loss.item()}")
     
     print("Finished training.")
         

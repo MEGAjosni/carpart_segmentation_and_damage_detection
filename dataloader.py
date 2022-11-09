@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import os
 
-user = 'Alek'
+user = 'Marcus'
 
 if user == 'Marcus':
     folder  = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
@@ -20,7 +20,10 @@ class CarDataset(Dataset):
         
         
         self.dir = directory
-        self.datalist = os.listdir(directory)
+        datalist = os.listdir(directory)
+        idx = [".npy" in string for string in datalist]
+        self.datalist = [i for indx,i in enumerate(datalist) if idx[indx] == True]
+        
         """
         x = []
         y = []
@@ -43,7 +46,7 @@ class CarDataset(Dataset):
         # dataset[]
         
         filename = os.path.join(self.dir, self.datalist[index])
-        data = np.load(filename)
+        data = np.load(filename, allow_pickle = True)
 
         return torch.tensor(data[:3]), torch.tensor(np.array([data[3]]))
     
