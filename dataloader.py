@@ -18,30 +18,39 @@ class CarDataset(Dataset):
     def __init__(self, directory):
         # Load data
         
+        
+        self.dir = directory
+        self.datalist = os.listdir(directory)
+        """
         x = []
         y = []
         
         for filename in os.listdir(directory):
             if filename[-4:] == ".npy":
-                data = np.load(os.path.join(directory, filename))
+                data = np.load(os.path.join(self, filename))
                 x.append(data[:3])
                 y.append(data[3])
+                
 
         self.n_samples = len(x)
         x = np.array(x)
         y = np.array(y)
         self.x = torch.from_numpy(x)
         self.y = torch.from_numpy(y)
-                
+                """
     
     def __getitem__(self, index):
         # dataset[]
-        return self.x[index], self.y[index]
+        
+        filename = os.path.join(self.dir, self.datalist[index])
+        data = np.load(filename)
+
+        return torch.tensor(data[:3]), torch.tensor(np.array([data[3]]))
     
     
     def __len__(self):
         # len(dataset)
-        return self.n_samples
+        return len(self.datalist)
 
 
 dataset = CarDataset(directory = folder)
