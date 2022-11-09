@@ -8,6 +8,7 @@ from torch import nn
 import torch.optim as optim
 from sklearn import metrics
 import numpy as np
+from tqdm import tqdm
 
 # Could be dice
 def accuracy(target, pred):
@@ -27,7 +28,7 @@ elif user == 'Jonas':
 
 #%% Training
 
-def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=100, validation_every_steps=500, learning_rate=0.001, loss_fn=nn.BCEWithLogitsLoss()):
+def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=20, validation_every_steps=500, learning_rate=0.001, loss_fn=nn.BCEWithLogitsLoss()):
 
     device = "cpu"
     if torch.cuda.is_available():
@@ -42,12 +43,13 @@ def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=100, va
     step = 0
     model.train()
     
-    for epoch in range(num_epochs):
+    for epoch in tqdm(range(num_epochs)):
         
+        print("epoch :", epoch)
         test_loss = []
         train_loss = []
         
-        for inputs, targets in train_loader:
+        for inputs, targets in tqdm(train_loader):
             inputs, targets = inputs.to(device), targets.to(device)
             
             # Forward pass, compute gradients, perform one training step.
@@ -59,7 +61,7 @@ def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=100, va
     
             # Increment step counter
             step += 1
-            print(step,batch_loss.item())
+            print("step: ",step,"loss: ",batch_loss.item())
             
             train_loss.append(batch_loss.item())
             
@@ -76,7 +78,17 @@ def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=100, va
                         
                         test_loss.append(loss.item())
         
-    
+                    
+                    plt.imshow(labels[idx][0])
+                    plt.title("True")
+                    plt.show()
+                    #with torch.no_grad():
+                    vae.cpu()
+                    pred = vae(images)[0][0]
+                    plt.imshow(pred.numpy())
+                    plt.title("pred")
+                    plt.show()
+        
                     model.train()
                     
                 # Append average validation accuracy to list.
@@ -102,3 +114,15 @@ test_loader = DataLoader(dataset=test_set, batch_size=batchsize, shuffle=True)
 
 #%%
 train_NN(vae,train_loader,test_loader,batch_size=batchsize,validation_every_steps=25)
+#%%
+images,labels = next(iter(test_loader))
+idx = 3
+plt.imshow(labels[idx][0])
+plt.title("True")
+plt.show()
+with torch.no_grad():
+    vae.cpu()
+    pred = vae(images)[0][0]
+    plt.imshow(pred.numpy())
+    plt.title("pred")
+    plt.show()
