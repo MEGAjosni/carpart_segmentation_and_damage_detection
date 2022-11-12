@@ -108,3 +108,7 @@ class UNet(nn.Module):
         )
         
 
+#%%
+
+unet = UNet()
+unet.double()

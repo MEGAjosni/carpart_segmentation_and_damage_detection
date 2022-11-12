@@ -4,7 +4,7 @@ import os
 from time import sleep
 
 
-folder = r"C:\Users\aleks\OneDrive\Skrivebord\clean_data\train_data\\"
+folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\train_data\\"
 
 for filename in os.listdir(folder):
     arr = np.load(folder+filename)

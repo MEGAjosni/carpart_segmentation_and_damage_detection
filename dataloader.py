@@ -3,12 +3,12 @@ from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import os
 
-user = 'Marcus'
+user = 'Alek'
 
 if user == 'Marcus':
     folder  = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
 elif user == 'Alek':
-    folder  = r"C:\Users\aleks\OneDrive\Skrivebord\clean_data\train_data"
+    folder  = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\train_data"
 elif user == 'Jonas':
     folder = 'hej'
 
