@@ -6,7 +6,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 
 
-user = 'Alek'
+user = 'Marcus'
 
 if user == 'Marcus':
     folder  = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
@@ -40,15 +40,17 @@ class CarDataset(Dataset):
         
         if self.changelabel:
             label = self.transform_segmentation_mask(9,data[3:])
+            label[0] = -label[0]+1 #fix background
             data = np.concatenate((data[:3],label),axis=0)
-        
+            
+            
         data = torch.tensor(data)
         if self.transform:
             data = self.transform(data)
             
         image = data[:3]
         label = data[3:].int()
-        
+        label[0] = (label[0]-1)*(-1) #fix
         return image, label
     
     
@@ -83,15 +85,17 @@ images,labels = next(dataiter)
 images = images.permute(0,2,3,1)
 labels = labels.permute(0,2,3,1)
 
-idx = 8
 
 #%%
+idx = 1
+carpart =2
+
 fig, axs = plt.subplots(1,2, sharey='row',
                     gridspec_kw={'hspace': 0, 'wspace': 0})
 
 axs[0].imshow(images[idx].numpy())
 axs[0].set_title('Image')
-axs[1].imshow(labels[idx][:,:,5],cmap = "gray")
+axs[1].imshow(labels[idx][:,:,carpart],cmap = "gray")
 axs[1].set_title('Segmentation mask')
 
 
