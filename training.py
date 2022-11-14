@@ -49,7 +49,7 @@ elif user == 'Jonas':
 
 #%% Training
 
-def train_NN(model, train_loader, test_loader, val_loader, batch_size=64, num_epochs=20, validation_every_steps=500, learning_rate=0.001, loss_fn=nn.BCEWithLogitsLoss()):
+def train_NN(model, train_loader, test_loader, val_loader, save_file='untitled', batch_size=64, num_epochs=20, validation_every_steps=500, learning_rate=0.001, loss_fn=nn.BCEWithLogitsLoss()):
 
     device = "cpu"
     if torch.cuda.is_available():
@@ -109,6 +109,18 @@ def train_NN(model, train_loader, test_loader, val_loader, batch_size=64, num_ep
          
                 print(f"Step {step:<5}   training loss: {batch_loss.item()}")
                 print(f"             test loss: {loss.item()}")
+    
+    # Save model
+    path_models = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models')
+    
+    suffix = ''
+    index = 0
+    while save_file + suffix + '.pt' in os.listdir(path_models):
+        suffix = '_' + str(index)
+        index += 1
+        
+    torch.save(model, os.path.join(path_models, save_file + suffix + '.pt'))
+        
     
     print("Finished training.")
  
