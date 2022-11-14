@@ -2,7 +2,7 @@ import os
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 from dataloader import CarDataset
 from torch.utils.data import Dataset, DataLoader
-from VAE_v1 import VAE
+from VAE_v2 import VAE_v2
 from Unet_v1 import UNet
 import torch
 from torch import nn
@@ -43,12 +43,13 @@ if user == 'Marcus':
 elif user == 'Alek':
     train_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\train_data"
     test_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\test_data"
+    val_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\validation_data"
 elif user == 'Jonas':
     folder = 'hej'
 
 #%% Training
 
-def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=20, validation_every_steps=500, learning_rate=0.001, loss_fn=nn.BCEWithLogitsLoss()):
+def train_NN(model, train_loader, test_loader, val_loader, batch_size=64, num_epochs=20, validation_every_steps=500, learning_rate=0.001, loss_fn=nn.BCEWithLogitsLoss()):
 
     device = "cpu"
     if torch.cuda.is_available():
@@ -66,7 +67,7 @@ def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=20, val
     for epoch in tqdm(range(num_epochs)):
         
         print("epoch :", epoch)
-        test_loss = []
+        val_loss = []
         train_loss = []
         
         for inputs, targets in tqdm(train_loader):
@@ -91,12 +92,12 @@ def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=20, val
                 # Compute accuracies on validation set.
                 with torch.no_grad():
                     model.eval()
-                    for inputs, targets in test_loader:
+                    for inputs, targets in val_loader:
                         inputs, targets = inputs.to(device), targets.to(device)
                         output = model(inputs)
                         loss = loss_fn(output, targets)
                         
-                        test_loss.append(loss.item())
+                        val_loss.append(loss.item())
         
                     
                     #plotfun(images,labels,1)
@@ -115,13 +116,13 @@ def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=20, val
 #%% define VAE
 batchsize = 16
 
-vae = VAE()
+vae = VAE_v2()
 vae.double()
 train_set = CarDataset(directory=train_folder)
-test_set = CarDataset(directory=test_folder)
+val_set = CarDataset(directory=val_folder)
 
 train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
-test_loader = DataLoader(dataset=test_set, batch_size=batchsize, shuffle=True)
+val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%% define UNet
 batchsize = 16
@@ -129,13 +130,13 @@ unet = UNet()
 unet.double()
 
 train_set = CarDataset(directory=train_folder)
-test_set = CarDataset(directory=test_folder)
+val_set = CarDataset(directory=val_folder)
 
 train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
-test_loader = DataLoader(dataset=test_set, batch_size=batchsize, shuffle=True)
+val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%%
-train_NN(vae,train_loader,test_loader,batch_size=batchsize,validation_every_steps=25,loss_fn = DiceLoss(), learning_rate=0.001)
+train_NN(vae,train_loader,test_loader,val_loader,batch_size=batchsize,validation_every_steps=25,loss_fn = DiceLoss(), learning_rate=0.001)
 
 #%%
 import matplotlib.pyplot as plt
