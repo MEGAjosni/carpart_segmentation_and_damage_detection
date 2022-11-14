@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
 from PIL import Image
 
@@ -50,7 +51,8 @@ class CarDataset(Dataset):
             
         image = data[:3]
         label = data[3:]
-        label[0] = (label[0]-1)*(-1) #fix
+        if self.changelabel:
+            label[0] = (label[0]-1)*(-1) #fix
         return image, label
     
     
@@ -78,16 +80,12 @@ dataiter = iter(dataloader)
 
 images,labels = next(dataiter)
 
-#%% Visuallization
-import matplotlib.pyplot as plt
-
+#%%
 images = images.permute(0,2,3,1)
 labels = labels.permute(0,2,3,1)
-
-
-#%%
-idx = 1
-carpart =0
+#%%#%% Visuallization
+idx = 5
+carpart =3
 
 fig, axs = plt.subplots(1,2, sharey='row',
                     gridspec_kw={'hspace': 0, 'wspace': 0})

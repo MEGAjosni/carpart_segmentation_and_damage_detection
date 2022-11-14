@@ -142,8 +142,8 @@ augmentations_val = transforms.Compose([transforms.Resize(size = imagewidth),
                                     ])
 vae = VAE_v2()
 vae.double()
-train_set = CarDataset(directory=train_folder, transform = augmentations_train, changelabel=False)
-val_set = CarDataset(directory=val_folder,transform = augmentations_val,changelabel=False)
+train_set = CarDataset(directory=train_folder, transform = augmentations_train, changelabel=True)
+val_set = CarDataset(directory=val_folder,transform = augmentations_val,changelabel=True)
 
 train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
@@ -160,7 +160,7 @@ train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%%
-train_NN(model=un,train_loader=train_loader,val_loader=val_loader,save_file='vae_v2',batch_size=batchsize,validation_every_steps=50,loss_fn = DiceLoss(), learning_rate=0.001)
+train_NN(model=unet,train_loader=train_loader,val_loader=val_loader,save_file='vae_v2',batch_size=batchsize,validation_every_steps=50,loss_fn = DiceLoss(), learning_rate=0.001)
 
 #%%
 import matplotlib.pyplot as plt
