@@ -2,8 +2,11 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import os
+import torchvision.transforms as transforms
+from PIL import Image
 
-user = 'Alek'
+
+user = 'Marcus'
 
 if user == 'Marcus':
     folder  = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
@@ -13,9 +16,12 @@ elif user == 'Jonas':
     folder = 'hej'
 
 
+imagewidth = 128
+
+
 class CarDataset(Dataset):
     
-    def __init__(self, directory):
+    def __init__(self, directory, transform = None):
         # Load data
         
         
@@ -23,45 +29,53 @@ class CarDataset(Dataset):
         datalist = os.listdir(directory)
         idx = [".npy" in string for string in datalist]
         self.datalist = [i for indx,i in enumerate(datalist) if idx[indx] == True]
+        self.transform = transform
         
-        """
-        x = []
-        y = []
-        
-        for filename in os.listdir(directory):
-            if filename[-4:] == ".npy":
-                data = np.load(os.path.join(self, filename))
-                x.append(data[:3])
-                y.append(data[3])
-                
-
-        self.n_samples = len(x)
-        x = np.array(x)
-        y = np.array(y)
-        self.x = torch.from_numpy(x)
-        self.y = torch.from_numpy(y)
-                """
     
     def __getitem__(self, index):
         # dataset[]
         
         filename = os.path.join(self.dir, self.datalist[index])
         data = np.load(filename, allow_pickle = True)
-
-        return torch.tensor(data[:3]), torch.tensor(np.array([data[3]]))
+        
+        data = torch.tensor(data)
+        if self.transform:
+            data = self.transform(data)
+            
+        image = data[:3]
+        label = data[3:]
+        return image, label
     
     
     def __len__(self):
         # len(dataset)
         return len(self.datalist)
 
-
-dataset = CarDataset(directory = folder)
+augmentations = transforms.Compose([transforms.RandomRotation((0,180)),
+                                    transforms.RandomHorizontalFlip(p=0.5),
+                                    transforms.Resize(size = imagewidth),
+                                    ])
+dataset = CarDataset(directory = folder, transform = augmentations)
 
 batchsize = 10
-dataloader = DataLoader(dataset=dataset, batch_size=batchsize, shuffle=True)
+
+dataloader = DataLoader(dataset=dataset, batch_size=batchsize,shuffle=True)
 dataiter = iter(dataloader)
 
-#%%
+
+#%% Visuallization
+import matplotlib.pyplot as plt
 
 images,labels = next(dataiter)
+
+images = images.permute(0,2,3,1)
+#%%
+idx = 6
+
+fig, axs = plt.subplots(1,2, sharey='row',
+                    gridspec_kw={'hspace': 0, 'wspace': 0})
+
+axs[0].imshow(images[idx].numpy())
+axs[0].set_title('Image')
+axs[1].imshow(labels[idx][0],cmap = "gray")
+axs[1].set_title('Segmentation mask')
