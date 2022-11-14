@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from time import sleep
-
+import torch
 
 folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\train_data\\"
 
@@ -26,3 +26,7 @@ for filename in os.listdir(folder):
     #sleep(2)
     
     
+#%%
+test = torch.tensor(arr[0:3])
+test = test[None,:,:,:]
+print(test.shape)
