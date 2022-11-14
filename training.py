@@ -30,7 +30,7 @@ class DiceLoss(nn.Module):
         targets = targets.view(-1)
         
         intersection = (inputs * targets).sum()                            
-        dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
+        dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)
         
         return 1 - dice
 
@@ -133,7 +133,7 @@ train_set = CarDataset(directory=train_folder)
 val_set = CarDataset(directory=val_folder)
 
 train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
-val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
+    val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%%
 train_NN(vae,train_loader,test_loader,val_loader,batch_size=batchsize,validation_every_steps=25,loss_fn = DiceLoss(), learning_rate=0.001)
