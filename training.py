@@ -2,7 +2,7 @@ import os
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 from dataloader import CarDataset
 from torch.utils.data import Dataset, DataLoader
-from VAE_v1 import VAE
+from VAE_v2 import VAE_v2
 from Unet_v1 import UNet
 import torch
 from torch import nn
@@ -43,12 +43,13 @@ if user == 'Marcus':
 elif user == 'Alek':
     train_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\train_data"
     test_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\test_data"
+    val_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\validation_data"
 elif user == 'Jonas':
     folder = 'hej'
 
 #%% Training
 
-def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=20, validation_every_steps=500, learning_rate=0.001, loss_fn=nn.BCEWithLogitsLoss()):
+def train_NN(model, train_loader, test_loader, val_loader, batch_size=64, num_epochs=20, validation_every_steps=500, learning_rate=0.001, loss_fn=nn.BCEWithLogitsLoss()):
 
     device = "cpu"
     if torch.cuda.is_available():
@@ -66,7 +67,7 @@ def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=20, val
     for epoch in tqdm(range(num_epochs)):
         
         print("epoch :", epoch)
-        test_loss = []
+        val_loss = []
         train_loss = []
         
         for inputs, targets in tqdm(train_loader):
@@ -91,12 +92,12 @@ def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=20, val
                 # Compute accuracies on validation set.
                 with torch.no_grad():
                     model.eval()
-                    for inputs, targets in test_loader:
+                    for inputs, targets in val_loader:
                         inputs, targets = inputs.to(device), targets.to(device)
                         output = model(inputs)
                         loss = loss_fn(output, targets)
                         
-                        test_loss.append(loss.item())
+                        val_loss.append(loss.item())
         
                     
                     #plotfun(images,labels,1)
@@ -110,91 +111,18 @@ def train_NN(model, train_loader, test_loader, batch_size=64, num_epochs=20, val
                 print(f"             test loss: {loss.item()}")
     
     print("Finished training.")
-        
-    
-#%% Training with 2 losses
-
-def train_NN2(model, train_loader, test_loader, batch_size=64, num_epochs=20, validation_every_steps=500, learning_rate=0.001, loss_fn1=nn.BCEWithLogitsLoss(), loss_fn2 = DiceLoss()):
-
-    device = "cpu"
-    if torch.cuda.is_available():
-        device = "cuda:0"  
-        
-    print(device)
-        
-    model.to(device)
-
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)    
-
-    step = 0
-    model.train()
-    
-    for epoch in tqdm(range(num_epochs)):
-        
-        print("epoch :", epoch)
-        test_loss = []
-        train_loss = []
-        
-        for inputs, targets in tqdm(train_loader):
-            inputs, targets = inputs.to(device), targets.to(device)
-            
-            # Forward pass, compute gradients, perform one training step.
-            output = model(inputs)
-            batch_loss1 = loss_fn1(output, targets)
-            batch_loss2 = loss_fn2(output, targets)
-            batch_loss = batch_loss1 + batch_loss2
-            optimizer.zero_grad()
-            batch_loss.backward()
-            optimizer.step()
-    
-            # Increment step counter
-            step += 1
-            print("step: ",step,"loss: ",batch_loss.item())
-            
-            train_loss.append(batch_loss.item())
-            
-            if step % validation_every_steps == 0:
-                
-                
-                # Compute accuracies on validation set.
-                with torch.no_grad():
-                    model.eval()
-                    for inputs, targets in test_loader:
-                        inputs, targets = inputs.to(device), targets.to(device)
-                        output = model(inputs)
-                        loss1 = loss_fn1(output, targets)
-                        loss2 = loss_fn2(output, targets)
-                        loss = loss1 + loss2
-                        
-                        test_loss.append(loss.item())
-        
-                    
-                    #plotfun(images,labels,1)
-                    #vae.cuda()
-        
-                    model.train()
-                    
-                # Append average validation accuracy to list.
-         
-                print(f"Step {step:<5}   training loss: {batch_loss.item()}")
-                print(f"             test loss: {loss.item()}")
-    
-    print("Finished training.")
-        
-    
-
  
     
 #%% define VAE
 batchsize = 16
 
-vae = VAE()
+vae = VAE_v2()
 vae.double()
 train_set = CarDataset(directory=train_folder)
-test_set = CarDataset(directory=test_folder)
+val_set = CarDataset(directory=val_folder)
 
 train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
-test_loader = DataLoader(dataset=test_set, batch_size=batchsize, shuffle=True)
+val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%% define UNet
 batchsize = 16
@@ -202,17 +130,13 @@ unet = UNet()
 unet.double()
 
 train_set = CarDataset(directory=train_folder)
-test_set = CarDataset(directory=test_folder)
+val_set = CarDataset(directory=val_folder)
 
 train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
-test_loader = DataLoader(dataset=test_set, batch_size=batchsize, shuffle=True)
+val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%%
-train_NN(vae,train_loader,test_loader,batch_size=batchsize,validation_every_steps=25,loss_fn = DiceLoss(), learning_rate=0.002)
-
-#%%
-train_NN2(vae,train_loader,test_loader,batch_size=batchsize,validation_every_steps=25)
-
+train_NN(vae,train_loader,test_loader,val_loader,batch_size=batchsize,validation_every_steps=25,loss_fn = DiceLoss(), learning_rate=0.001)
 
 #%%
 import matplotlib.pyplot as plt
