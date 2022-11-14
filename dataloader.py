@@ -49,7 +49,7 @@ class CarDataset(Dataset):
             data = self.transform(data)
             
         image = data[:3]
-        label = data[3:].int()
+        label = data[3:]
         label[0] = (label[0]-1)*(-1) #fix
         return image, label
     
@@ -76,11 +76,10 @@ batchsize = 10
 dataloader = DataLoader(dataset=dataset, batch_size=batchsize,shuffle=True)
 dataiter = iter(dataloader)
 
+images,labels = next(dataiter)
 
 #%% Visuallization
 import matplotlib.pyplot as plt
-
-images,labels = next(dataiter)
 
 images = images.permute(0,2,3,1)
 labels = labels.permute(0,2,3,1)
@@ -88,7 +87,7 @@ labels = labels.permute(0,2,3,1)
 
 #%%
 idx = 1
-carpart =2
+carpart =0
 
 fig, axs = plt.subplots(1,2, sharey='row',
                     gridspec_kw={'hspace': 0, 'wspace': 0})

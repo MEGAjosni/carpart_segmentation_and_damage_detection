@@ -16,7 +16,7 @@ print("Device:",device)
 Remember to reference!!!"""
 
 class UNet(nn.Module):
-    def __init__(self, in_channels=3, out_channels=1, init_features=32):
+    def __init__(self, in_channels=3, out_channels=9, init_features=32):
         super(UNet, self).__init__()
 
         features = init_features
