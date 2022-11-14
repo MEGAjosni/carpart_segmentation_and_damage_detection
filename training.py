@@ -44,6 +44,7 @@ elif user == 'Alek':
     train_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\train_data"
     test_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\test_data"
     val_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\validation_data"
+    save_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning"
 elif user == 'Jonas':
     folder = 'hej'
 
@@ -111,7 +112,8 @@ def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=6
                 print(f"             val loss: {loss.item()}")
     
     # Save model
-    path_models = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models')
+    #path_models = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models')
+    path_models = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning"
     
     suffix = ''
     index = 0
@@ -139,8 +141,8 @@ augmentations_val = transforms.Compose([transforms.Resize(size = imagewidth),
                                     ])
 vae = VAE_v2()
 vae.double()
-train_set = CarDataset(directory=train_folder, transform = augmentations_train)
-val_set = CarDataset(directory=val_folder,transform = augmentations_val)
+train_set = CarDataset(directory=train_folder, transform = augmentations_train, changelabel=False)
+val_set = CarDataset(directory=val_folder,transform = augmentations_val,changelabel=False)
 
 train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
@@ -157,14 +159,14 @@ train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%%
-train_NN(model=vae,train_loader=train_loader,val_loader=val_loader,save_file='vae_v2',batch_size=batchsize,validation_every_steps=25,loss_fn = DiceLoss(), learning_rate=0.001)
+train_NN(model=vae,train_loader=train_loader,val_loader=val_loader,save_file='vae_v2',batch_size=batchsize,validation_every_steps=50,loss_fn = DiceLoss(), learning_rate=0.001)
 
 #%%
 import matplotlib.pyplot as plt
 
 
 images,labels = next(iter(val_loader))
-idx = 8
+idx = 6
 def plotfun(images,labels,idx):
     fig, axs = plt.subplots(1,2,sharex='col', sharey='row',
                         gridspec_kw={'hspace': 0, 'wspace': 0})

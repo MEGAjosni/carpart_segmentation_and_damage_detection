@@ -6,14 +6,14 @@ import torchvision.transforms as transforms
 
 #%%
 # Get path of model savefile
-model_savefile = 'vae_v2_1.pt'
+model_savefile = 'vae_v2.pt'
 path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models', model_savefile)
 
 # Load model
 model = torch.load(path)
-#%%
 model.cpu()
-
+#%%
+model = vae.cpu()
 # Load testdata
 data_path = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\test_data"
 
