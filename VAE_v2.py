@@ -12,7 +12,7 @@ print("Device:",device)
 #%% An actual variational auto encoder
 
 class VAE_v2(nn.Module):
-    def __init__(self, in_channels=3, out_channels=9,featureDim = 24*9*9, zDim = 256):
+    def __init__(self, in_channels=3, out_channels=8,featureDim = 24*9*9, zDim = 256):
         super(VAE_v2,self).__init__()
     
         self.relu = nn.ReLU()
@@ -90,6 +90,7 @@ class VAE_v2(nn.Module):
         size2 = x.size()
         x,indices2 = self.maxpool2(x)
         x = self.relu(self.conv3(x))
+        #print(x.shape)
         
         x = x.view(-1, 24*9*9)
         mu = self.FC1(x)

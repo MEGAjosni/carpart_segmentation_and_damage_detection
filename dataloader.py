@@ -55,6 +55,8 @@ class CarDataset(Dataset):
         label = data[3:]
         if self.changelabel:
             label[0] = (label[0]-1)*(-1) #fix
+            return image, label[1:]
+        
         return image, label
     
     
