@@ -11,6 +11,7 @@ from sklearn import metrics
 import numpy as np
 from tqdm import tqdm
 import torch.nn.functional as F
+from torch import nn
 
 # Could be dice
 def accuracy(target, pred):
@@ -23,7 +24,10 @@ class DiceLoss(nn.Module):
     def forward(self, inputs, targets, smooth=1):
         
         #comment out if your model contains a sigmoid or equivalent activation layer
-        inputs = F.sigmoid(inputs)       
+        inputs = F.sigmoid(inputs)      
+        
+        #print(inputs.shape)
+        #print(targets.shape)
         
         #flatten label and prediction tensors
         inputs = inputs.view(-1)
@@ -35,7 +39,7 @@ class DiceLoss(nn.Module):
         return 1 - dice
 
 
-user = 'Marcus'
+user = 'Alek'
 
 if user == 'Marcus':
     train_folder = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
@@ -160,7 +164,7 @@ train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%%
-train_NN(model=unet,train_loader=train_loader,val_loader=val_loader,save_file='vae_v2',batch_size=batchsize,validation_every_steps=50,loss_fn = DiceLoss(), learning_rate=0.001)
+train_NN(model=vae,train_loader=train_loader,val_loader=val_loader,save_file='vae_v2',batch_size=batchsize,validation_every_steps=50,loss_fn = DiceLoss(), learning_rate=0.001)
 
 #%%
 import matplotlib.pyplot as plt

@@ -75,7 +75,7 @@ class UNet(nn.Module):
         return torch.sigmoid(self.conv(dec1))
 
     @staticmethod
-        dec2 = torch.cat((dec2, enc2), dim=1)
+    #dec2 = torch.cat((dec2, enc2), dim=1)
     def _block(in_channels, features, kernelwidth, name):
         return nn.Sequential(
             OrderedDict(
@@ -113,4 +113,4 @@ class UNet(nn.Module):
 
 unet = UNet()
 unet.double()
-unet(images)
+#unet(images)

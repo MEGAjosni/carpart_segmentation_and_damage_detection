@@ -7,7 +7,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 
 
-user = 'Marcus'
+user = 'Alek'
 
 if user == 'Marcus':
     folder  = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
