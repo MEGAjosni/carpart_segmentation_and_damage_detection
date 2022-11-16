@@ -11,7 +11,6 @@ from sklearn import metrics
 import numpy as np
 from tqdm import tqdm
 import torch.nn.functional as F
-from torch import nn
 
 # Could be dice
 def accuracy(target, pred):
@@ -24,10 +23,7 @@ class DiceLoss(nn.Module):
     def forward(self, inputs, targets, smooth=1):
         
         #comment out if your model contains a sigmoid or equivalent activation layer
-        inputs = F.sigmoid(inputs)      
-        
-        #print(inputs.shape)
-        #print(targets.shape)
+        inputs = F.sigmoid(inputs)       
         
         #flatten label and prediction tensors
         inputs = inputs.view(-1)
@@ -39,7 +35,7 @@ class DiceLoss(nn.Module):
         return 1 - dice
 
 
-user = 'Alek'
+user = 'Marcus'
 
 if user == 'Marcus':
     train_folder = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
@@ -135,11 +131,11 @@ def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=6
 #%% define VAE
 import torchvision.transforms as transforms
 
-batchsize = 16
+batchsize = 8
 imagewidth = 128
-augmentations_train = transforms.Compose([transforms.RandomRotation((0,180)),
+augmentations_train = transforms.Compose([transforms.Resize(size = imagewidth),
+                                    transforms.RandomRotation((0,180)),
                                     transforms.RandomHorizontalFlip(p=0.5),
-                                    transforms.Resize(size = imagewidth),
                                     ])
 
 augmentations_val = transforms.Compose([transforms.Resize(size = imagewidth),
@@ -153,35 +149,17 @@ train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%% define UNet
-batchsize = 16
+batchsize = 8
 unet = UNet()
 unet.double()
 
-train_set = CarDataset(directory=train_folder)
-val_set = CarDataset(directory=val_folder)
+train_set = CarDataset(directory=train_folder,transform = augmentations_train,changelabel=True)
+val_set = CarDataset(directory=val_folder,transform = augmentations_train,changelabel=True)
 
 train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%%
-train_NN(model=vae,train_loader=train_loader,val_loader=val_loader,save_file='vae_v2',batch_size=batchsize,validation_every_steps=50,loss_fn = DiceLoss(), learning_rate=0.001)
-
-#%%
-import matplotlib.pyplot as plt
+train_NN(model=unet,train_loader=train_loader,val_loader=val_loader,save_file='vae_v2',batch_size=batchsize,validation_every_steps=50,loss_fn = DiceLoss(), learning_rate=0.001,num_epochs=  50)
 
 
-images,labels = next(iter(val_loader))
-idx = 6
-def plotfun(images,labels,idx):
-    fig, axs = plt.subplots(1,2,sharex='col', sharey='row',
-                        gridspec_kw={'hspace': 0, 'wspace': 0})
-    axs[0].imshow(labels[idx][0])
-    axs[0].set_title('True')
-    with torch.no_grad():
-        vae.cpu()
-        pred = vae(images)[idx][0]
-        axs[1].imshow(pred.numpy())
-        axs[1].set_title('Prediction')
-        plt.show()
-        
-plotfun(images,labels,idx)
