@@ -68,5 +68,5 @@ class VAE(nn.Module):
 vae = VAE(in_channels=3,out_channels=1)
 vae.double()
 
-        
+
         

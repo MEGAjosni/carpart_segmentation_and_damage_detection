@@ -1,3 +1,5 @@
+
+#%%
 import torch
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
@@ -7,7 +9,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 
 
-user = 'Marcus'
+user = 'Alek'
 
 if user == 'Marcus':
     folder  = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
@@ -31,7 +33,7 @@ class CarDataset(Dataset):
         idx = [".npy" in string for string in datalist]
         self.datalist = [i for indx,i in enumerate(datalist) if idx[indx] == True]
         self.transform = transform
-        self.changelabel = changelabel        
+        self.changelabel = changelabel
     
     def __getitem__(self, index):
         # dataset[]
@@ -83,9 +85,13 @@ images,labels = next(dataiter)
 #%%
 images = images.permute(0,2,3,1)
 labels = labels.permute(0,2,3,1)
+
+#%% fix error at marcus pc
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 #%%#%% Visuallization
 idx = 5
-carpart =3
+carpart =0
 
 fig, axs = plt.subplots(1,2, sharey='row',
                     gridspec_kw={'hspace': 0, 'wspace': 0})
@@ -96,11 +102,3 @@ axs[1].imshow(labels[idx][:,:,carpart],cmap = "gray")
 axs[1].set_title('Segmentation mask')
 
 
-#%%
-"""
-from tqdm import tqdm
-
-maxs = []
-for images,labels in tqdm(dataloader):
-    maxs.append(torch.max(labels).detach().numpy())
-    """
