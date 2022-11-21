@@ -6,10 +6,10 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
-from PIL import Image
+from torchvision.transforms import InterpolationMode
 
 
-user = 'Alek'
+user = 'Marcus'
 
 if user == 'Marcus':
     folder  = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
@@ -41,10 +41,8 @@ class CarDataset(Dataset):
         filename = os.path.join(self.dir, self.datalist[index])
         data = np.load(filename, allow_pickle = True)
         
-        if self.changelabel:
-            label = self.transform_segmentation_mask(9,data[3:])
-            label[0] = -label[0]+1 #fix background
-            data = np.concatenate((data[:3],label),axis=0)
+        label = self.transform_segmentation_mask(9,data[3:])
+        data = np.concatenate((data[:3],label[1:]),axis=0)
             
             
         data = torch.tensor(data)
@@ -53,11 +51,14 @@ class CarDataset(Dataset):
             
         image = data[:3]
         label = data[3:]
-        if self.changelabel:
-            label[0] = (label[0]-1)*(-1) #fix
-            return image, label[1:]
         
-        return image, label
+        if not self.changelabel:
+            mask = torch.zeros(1,label.shape[1],label.shape[2])
+            for i,segmentation in enumerate(label):
+                mask[0] += segmentation*(i+1)
+            label= mask
+        
+        return image, label.int()
     
     
     def __len__(self):
@@ -73,9 +74,9 @@ class CarDataset(Dataset):
 
 augmentations = transforms.Compose([transforms.Resize(size = imagewidth),
                                     transforms.RandomHorizontalFlip(p=0.5),
-                                    transforms.RandomRotation((0,180)),
+                                    transforms.RandomRotation((-45,45)),
                                     ])
-dataset = CarDataset(directory = folder, transform = augmentations,changelabel = True)
+dataset = CarDataset(directory = folder, transform = augmentations,changelabel = False)
 
 batchsize = 10
 
