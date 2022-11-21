@@ -16,7 +16,7 @@ class VAE_v2(nn.Module):
         super(VAE_v2,self).__init__()
     
         self.relu = nn.ReLU()
-        self.sigmoid = nn.Sigmoid()
+        self.softmax = torch.Softmax(dim=1)
         #conv1
         self.conv1 = nn.Conv2d(in_channels=in_channels, out_channels=16, kernel_size=32)
         
@@ -111,7 +111,7 @@ class VAE_v2(nn.Module):
         x = self.relu(self.deconv2(x))
         x=self.maxunpool1(x,indices1,size1)
         out = self.deconv3(x)
-        #out = self.sigmoid(out)
+        out = self.softmax(out)
 
         
         """mu, logVar = self.encoder(x)
