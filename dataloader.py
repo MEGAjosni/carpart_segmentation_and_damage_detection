@@ -9,7 +9,7 @@ import torchvision.transforms as transforms
 from torchvision.transforms import InterpolationMode
 
 
-user = 'Alek'
+user = 'Marcus'
 
 if user == 'Marcus':
     folder  = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
@@ -76,7 +76,7 @@ augmentations = transforms.Compose([transforms.Resize(size = imagewidth),
                                     transforms.RandomHorizontalFlip(p=0.5),
                                     transforms.RandomRotation((-45,45)),
                                     ])
-dataset = CarDataset(directory = folder, transform = augmentations,changelabel = False)
+dataset = CarDataset(directory = folder, transform = augmentations,changelabel = True)
 
 batchsize = 10
 
@@ -85,23 +85,36 @@ dataiter = iter(dataloader)
 
 images,labels = next(dataiter)
 
-#%%
-images = images.permute(0,2,3,1)
-labels = labels.permute(0,2,3,1)
 
 #%% fix error at marcus pc
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 #%%#%% Visuallization
-idx = 5
+idx = 1
 carpart =0
 
-fig, axs = plt.subplots(1,2, sharey='row',
-                    gridspec_kw={'hspace': 0, 'wspace': 0})
+def plot_things(images,labels,prediction = [], idx = 0, carpart = 0):
+    images = images.permute(0,2,3,1)
+    labels = labels.permute(0,2,3,1)
+    
+    n = 3 if len(prediction) > 0 else 2
+    fig, axs = plt.subplots(1,n, sharey='row',
+                        gridspec_kw={'hspace': 0, 'wspace': 0})
+    
+    axs[0].imshow(images[idx].numpy())
+    axs[0].set_title('Image')
+    axs[1].imshow(labels[idx][:,:,carpart],cmap = "gray")
+    axs[1].set_title('Ground truth')
+    axs[0].set_axis_off()
+    axs[1].set_axis_off()
+    if n > 2:
+        prediction = prediction.permute(0,2,3,1)
+        axs[2].imshow(prediction[idx][:,:,carpart].detach().numpy(),cmap = "gray")
+        axs[2].set_title('Prediction')
+        axs[2].set_axis_off()
+    plt.show()
 
-axs[0].imshow(images[idx].numpy())
-axs[0].set_title('Image')
-axs[1].imshow(labels[idx][:,:,carpart],cmap = "gray")
-axs[1].set_title('Segmentation mask')
+plot_things(images,labels, idx = idx, carpart = carpart)
+
 
 

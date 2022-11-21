@@ -1,6 +1,6 @@
 import os
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
-from dataloader import CarDataset
+from dataloader import CarDataset,plot_things
 from torch.utils.data import Dataset, DataLoader
 from VAE_v2 import VAE_v2
 from VAE_v1 import VAE_v1
@@ -16,9 +16,9 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from pytorch_toolbelt.losses import dice
 
-classes = torch.tensor([0, 1,  2,  3,  4,  5,  6,  7])
+classes = torch.arange(0,8)
 
-user = 'Alek'
+user = 'Marcus'
 
 if user == 'Marcus':
     train_folder = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
@@ -67,7 +67,7 @@ def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=6
             optimizer.zero_grad()
             batch_loss.backward()
             optimizer.step()
-    
+            
             # Increment step counter
             step += 1
             print("step: ",step,"loss: ",batch_loss.item())
@@ -85,21 +85,11 @@ def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=6
                         loss = loss_fn(output, targets.long())
                         
                         val_loss.append(loss.item())
-                        
-                    output_plot = output.cpu()
-                    target_plot = targets.cpu()
-                    print(output_plot.shape)
-                    output_plot = output_plot[0]
-                    target_plot = target_plot[0]
-        
-                    fig, axs = plt.subplots(1,2, sharey='row',
-                                        gridspec_kw={'hspace': 0, 'wspace': 0})
+                    
+                    idx = 0 #choose first element in batch
+                    carpart = 0 #show door
+                    plot_things(inputs,targets, prediction = output ,idx = idx, carpart = carpart)
 
-                    axs[0].imshow(output_plot[0].numpy(),cmap="gray")
-                    axs[0].set_title('Output')
-                    axs[1].imshow(target_plot[0],cmap = "gray")
-                    axs[1].set_title('Segmentation mask')
-                    plt.show()
         
                     model.train()
                     
