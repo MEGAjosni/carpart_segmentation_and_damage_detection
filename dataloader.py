@@ -21,7 +21,6 @@ elif user == 'Jonas':
 
 imagewidth = 128
 
-
 class CarDataset(Dataset):
     
     def __init__(self, directory, transform = None, changelabel = None):
@@ -42,8 +41,8 @@ class CarDataset(Dataset):
         data = np.load(filename, allow_pickle = True)
         
         label = self.transform_segmentation_mask(9,data[3:])
-        data = np.concatenate((data[:3],label[1:]),axis=0)
-            
+        label[0] = (label[0]-1)*(-1) #invert background
+        data = np.concatenate((data[:3],label),axis=0)
             
         data = torch.tensor(data)
         if self.transform:
@@ -58,7 +57,8 @@ class CarDataset(Dataset):
                 mask[0] += segmentation*(i+1)
             label= mask
         
-        return image, label.int()
+        label[0] = (label[0]-1)*(-1)
+        return image, label.round().int()
     
     
     def __len__(self):
@@ -85,12 +85,11 @@ dataiter = iter(dataloader)
 
 images,labels = next(dataiter)
 
-
 #%% fix error at marcus pc
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 #%%#%% Visuallization
-idx = 1
+idx = 8
 carpart =0
 
 def plot_things(images,labels,prediction = [], idx = 0, carpart = 0):
