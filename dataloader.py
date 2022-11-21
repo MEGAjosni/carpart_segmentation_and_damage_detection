@@ -92,28 +92,31 @@ os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 idx = 8
 carpart =0
 
-def plot_things(images,labels,prediction = [], idx = 0, carpart = 0):
-    images = images.permute(0,2,3,1)
-    labels = labels.permute(0,2,3,1)
+def plot_things(images,labels,predictions = [], idx = 0, carpart = all):
+    image = images[idx].permute(1,2,0)
+    label = labels[idx]
+    label = torch.argmax(label,dim = 0) if carpart == all else label[carpart,:,:]
     
-    n = 3 if len(prediction) > 0 else 2
+    n = 3 if len(predictions) > 0 else 2
     fig, axs = plt.subplots(1,n, sharey='row',
                         gridspec_kw={'hspace': 0, 'wspace': 0})
     
-    axs[0].imshow(images[idx].numpy())
+    axs[0].imshow(image.numpy())
     axs[0].set_title('Image')
-    axs[1].imshow(labels[idx][:,:,carpart],cmap = "gray")
+    axs[1].imshow(label,cmap = "gray")
     axs[1].set_title('Ground truth')
     axs[0].set_axis_off()
     axs[1].set_axis_off()
     if n > 2:
-        prediction = prediction.permute(0,2,3,1)
-        axs[2].imshow(prediction[idx][:,:,carpart].detach().numpy(),cmap = "gray")
+        prediction = predictions[idx]
+        prediction = torch.argmax(prediction,dim = 0) if carpart == all else prediction[carpart,:,:]
+        axs[2].imshow(prediction.detach().numpy(),cmap = "gray")
         axs[2].set_title('Prediction')
         axs[2].set_axis_off()
     plt.show()
 
-plot_things(images,labels, idx = idx, carpart = carpart)
+plot_things(images,labels,idx = idx, carpart =all)
+
 
 
 

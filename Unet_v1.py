@@ -17,9 +17,9 @@ Remember to reference!!!"""
 
 class UNet(nn.Module):
 
-    def __init__(self, in_channels=3, out_channels=1, init_features=32):
+    def __init__(self, in_channels=3, out_channels=9, init_features=32):
         super(UNet, self).__init__()
-        self.softmax = nn.torch.Softmax(dim=1)
+        self.softmax = torch.nn.Softmax(dim=1)
 
         features = init_features
         self.encoder1 = UNet._block(in_channels, features, name="enc1")

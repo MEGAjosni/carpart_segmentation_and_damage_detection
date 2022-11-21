@@ -88,7 +88,7 @@ def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=6
                     
                     idx = 0 #choose first element in batch
                     carpart = 0 #show door
-                    plot_things(inputs,targets, prediction = output ,idx = idx, carpart = carpart)
+                    plot_things(inputs,targets, prediction = output ,idx = idx, carpart = all)
 
         
                     model.train()
