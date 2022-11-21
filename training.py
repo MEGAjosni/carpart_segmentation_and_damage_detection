@@ -3,6 +3,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 from dataloader import CarDataset
 from torch.utils.data import Dataset, DataLoader
 from VAE_v2 import VAE_v2
+from VAE_v1 import VAE_v1
 from Unet_v1 import UNet
 from diceloss import DiceLoss
 import torch
@@ -13,32 +14,11 @@ import numpy as np
 from tqdm import tqdm
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
+from pytorch_toolbelt.losses import dice
 
-# Could be dice
-def accuracy(target, pred):
-    return metrics.accuracy_score(target.detach().cpu().numpy(), pred.detach().cpu().numpy())
-
-"""class DiceLoss(nn.Module):
-    def __init__(self, weight=None, size_average=True):
-        super(DiceLoss, self).__init__()
-
-    def forward(self, inputs, targets, smooth=1):
-        
-        #comment out if your model contains a sigmoid or equivalent activation layer
-        #inputs = F.sigmoid(inputs)
-        #hack temporary solution
-        targets[targets > 0] = 1
-        
-        
-        #flatten label and prediction tensors
-        inputs = inputs.view(-1)
-        targets = targets.view(-1)
-        
-        intersection = (inputs * targets).sum()                            
-        dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)
-        
-        return 1 - dice"""
-
+classes = torch.tensor([0,  1,  2,  3,  4,  5,  6,  7,  8, 9, 10, 11, 12, 13,
+        14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+        30, 31, 32])
 
 user = 'Alek'
 
@@ -80,6 +60,8 @@ def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=6
         train_loss = []
         
         for inputs, targets in tqdm(train_loader):
+            #print(max(targets.unique()))
+            targets /= 8
             inputs, targets = inputs.to(device), targets.to(device)
             
             # Forward pass, compute gradients, perform one training step.
@@ -101,6 +83,7 @@ def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=6
                 with torch.no_grad():
                     model.eval()
                     for inputs, targets in val_loader:
+                        targets /= 8
                         inputs, targets = inputs.to(device), targets.to(device)
                         output = model(inputs)
                         loss = loss_fn(output, targets)
@@ -109,6 +92,7 @@ def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=6
                         
                     output_plot = output.cpu()
                     target_plot = targets.cpu()
+                    print(output_plot.shape)
                     output_plot = output_plot[0]
                     target_plot = target_plot[0]
         
@@ -167,17 +151,29 @@ train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%% define UNet
+import torchvision.transforms as transforms
+
 batchsize = 8
-unet = UNet()
+unet = UNet(out_channels=1)
 unet.double()
 
-train_set = CarDataset(directory=train_folder,transform = augmentations_train,changelabel=True)
-val_set = CarDataset(directory=val_folder,transform = augmentations_train,changelabel=True)
+imagewidth = 128
+augmentations_train = transforms.Compose([transforms.Resize(size = imagewidth),
+                                    transforms.RandomRotation((0,180)),
+                                    transforms.RandomHorizontalFlip(p=0.5),
+                                    ])
+
+augmentations_val = transforms.Compose([transforms.Resize(size = imagewidth),
+                                    ])
+
+train_set = CarDataset(directory=train_folder,transform = augmentations_train,changelabel=False)
+val_set = CarDataset(directory=val_folder,transform = augmentations_train,changelabel=False)
 
 train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%%
-train_loss, val_loss = train_NN(model=vae,train_loader=train_loader,val_loader=val_loader,save_file='vae_v2',batch_size=batchsize,validation_every_steps=50, learning_rate=0.0001,num_epochs=20, loss_fn = DiceLoss())
+train_loss, val_loss = train_NN(model=unet,train_loader=train_loader,val_loader=val_loader,save_file='unet',batch_size=batchsize,validation_every_steps=100, 
+                                learning_rate=0.005,num_epochs=20, loss_fn = nn.BCEWithLogitsLoss())
 
 #%% plot loss

@@ -77,7 +77,7 @@ class UNet(nn.Module):
         
         seg = self.conv(dec1)
         
-        seg = torch.sigmoid(seg)
+        #seg = torch.sigmoid(seg)
         
         return seg
 
