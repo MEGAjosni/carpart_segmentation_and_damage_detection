@@ -1,12 +1,15 @@
 import torch
 import os
-from dataloader import CarDataset
+from dataloader import CarDataset, plot_things
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
+from pytorch_toolbelt.losses.functional import soft_dice_score
+import numpy as np
+
 
 #%%
 # Get path of model savefile
-model_savefile = 'vae_v2_0.pt'
+model_savefile = 'unet.pt'
 path = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\\"
 
 # Load model
@@ -18,28 +21,21 @@ model.cpu()
 data_path = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\test_data"
 
 
-imagewidth = 128
-augmentations_test = transforms.Compose([transforms.Resize(size = imagewidth),
-                                    ])
-test_data = CarDataset(data_path, transform=augmentations_test)
+
+test_data = CarDataset(data_path,changelabel=True)
 test_loader = DataLoader(dataset=test_data, batch_size=1)
 
-# Define dicecoefficient
-def dice_coeff(mask1, mask2):
-    #hack to ensure only 1's and 0's
-    mask1[mask1>0] = 1
-    mask2[mask2>0] = 1
-    
-    intersect = torch.sum(mask1*mask2)
-    fsum = torch.sum(mask1)
-    ssum = torch.sum(mask2)
-    dice = (2 * intersect ) / (fsum + ssum)
-    dice = torch.mean(dice)
-    #dice = round(dice, 3) # for easy reading
-    return dice    
+
 
 # Compute dice coefficients
 dicecoeffs = []
 for inputs,targets in test_loader:
     pred = model(inputs)
-    dicecoeffs.append(dice_coeff(pred, targets).item())
+    plot_things(inputs,targets,pred,idx=0)
+    pred = torch.argmax(pred, dim = 1)
+    targets = torch.argmax(targets,dim=1)
+    # divide pred by 7 so all values are between 0 and 1
+    dicecoeffs.append(soft_dice_score(pred/7,targets).item())
+    
+    
+print(np.mean(dicecoeffs))
