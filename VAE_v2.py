@@ -16,7 +16,7 @@ class VAE_v2(nn.Module):
         super(VAE_v2,self).__init__()
     
         self.relu = nn.ReLU()
-        self.softmax = torch.Softmax(dim=1)
+        self.softmax = torch.nn.Softmax(dim=1)
         #conv1
         self.conv1 = nn.Conv2d(in_channels=in_channels, out_channels=16, kernel_size=32)
         

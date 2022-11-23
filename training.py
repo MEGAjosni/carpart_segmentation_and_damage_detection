@@ -15,6 +15,7 @@ from tqdm import tqdm
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from pytorch_toolbelt.losses import dice
+from pytorch_toolbelt.losses.functional import soft_dice_score
 
 classes = torch.arange(0,8)
 
@@ -75,6 +76,7 @@ def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=6
             
             if step % validation_every_steps == 0:
                 
+                val_acc = []
                 train_loss.append(batch_loss.item())
                 # Compute accuracies on validation set.
                 with torch.no_grad():
@@ -83,14 +85,17 @@ def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=6
                         inputs, targets = inputs.to(device), targets.to(device)
                         output = model(inputs)
                         loss = loss_fn(output, targets.long())
+                        #accuracy
+                        y_pred = F.one_hot(torch.argmax(output, dim = 1),9)
+                        y_pred = y_pred.permute(0, 3, 1, 2)
+                        dice_score = soft_dice_score(y_pred,targets)
+                        val_acc.append(dice_score)
                         
                         val_loss.append(loss.item())
                     
                     idx = 0 #choose first element in batch
-                    carpart = 0 #show door
-                    plot_things(inputs,targets, prediction = output ,idx = idx, carpart = all)
-
-        
+                    print("dice score: ", val_acc[-1])
+                    plot_things(inputs,targets, output ,idx = idx, carpart = all)
                     model.train()
                     
                 # Append average validation accuracy to list.
@@ -140,12 +145,12 @@ val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 import torchvision.transforms as transforms
 
 batchsize = 8
-unet = UNet(out_channels=8)
+unet = UNet(out_channels=9)
 unet.double()
 
 imagewidth = 128
 augmentations_train = transforms.Compose([transforms.Resize(size = imagewidth),
-                                    transforms.RandomRotation((0,180)),
+                                    transforms.RandomRotation((-30,30)),
                                     transforms.RandomHorizontalFlip(p=0.5),
                                     ])
 
@@ -159,7 +164,7 @@ train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%%
-train_loss, val_loss = train_NN(model=unet,train_loader=train_loader,val_loader=val_loader,save_file='unet',batch_size=batchsize,validation_every_steps=100, 
+train_loss, val_loss = train_NN(model=unet,train_loader=train_loader,val_loader=val_loader,save_file='unet',batch_size=batchsize,validation_every_steps=1,
                                 learning_rate=0.005,num_epochs=20, loss_fn = dice.DiceLoss("multilabel",classes))
 
 #%% plot loss

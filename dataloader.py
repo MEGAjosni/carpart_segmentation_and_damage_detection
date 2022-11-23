@@ -1,12 +1,11 @@
 
-#%%
 import torch
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import os
 import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
-from torchvision.transforms import InterpolationMode
+import torch.nn.functional as F
 
 
 user = 'Marcus'
@@ -71,7 +70,7 @@ class CarDataset(Dataset):
             carpart = int(carpart)
             mask[carpart][label[0] == carpart] = 1.0
         return mask
-
+    
 augmentations = transforms.Compose([transforms.Resize(size = imagewidth),
                                     transforms.RandomHorizontalFlip(p=0.5),
                                     transforms.RandomRotation((-45,45)),
@@ -101,16 +100,16 @@ def plot_things(images,labels,predictions = [], idx = 0, carpart = all):
     fig, axs = plt.subplots(1,n, sharey='row',
                         gridspec_kw={'hspace': 0, 'wspace': 0})
     
-    axs[0].imshow(image.numpy())
+    axs[0].imshow(image.detach().cpu().numpy())
     axs[0].set_title('Image')
-    axs[1].imshow(label,cmap = "gray")
+    axs[1].imshow(label.detach().cpu().numpy(),cmap = "gray")
     axs[1].set_title('Ground truth')
     axs[0].set_axis_off()
     axs[1].set_axis_off()
     if n > 2:
         prediction = predictions[idx]
         prediction = torch.argmax(prediction,dim = 0) if carpart == all else prediction[carpart,:,:]
-        axs[2].imshow(prediction.detach().numpy(),cmap = "gray")
+        axs[2].imshow(prediction.detach().cpu().numpy(),cmap = "gray")
         axs[2].set_title('Prediction')
         axs[2].set_axis_off()
     plt.show()
