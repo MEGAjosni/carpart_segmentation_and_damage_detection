@@ -144,12 +144,12 @@ val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 #%% define UNet
 import torchvision.transforms as transforms
 
-batchsize = 8
+batchsize = 10
 unet = UNet(out_channels=9)
 unet.double()
 
-imagewidth = 128
-augmentations_train = transforms.Compose([transforms.Resize(size = imagewidth),
+imagewidth = 256
+augmentations_train = transforms.Compose([#transforms.Resize(size = imagewidth),
                                     transforms.RandomRotation((-30,30)),
                                     transforms.RandomHorizontalFlip(p=0.5),
                                     ])
@@ -164,7 +164,7 @@ train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%%
-train_loss, val_loss = train_NN(model=unet,train_loader=train_loader,val_loader=val_loader,save_file='unet',batch_size=batchsize,validation_every_steps=1,
-                                learning_rate=0.005,num_epochs=20, loss_fn = dice.DiceLoss("multilabel",classes))
+train_loss, val_loss = train_NN(model=unet,train_loader=train_loader,val_loader=val_loader,save_file='unet',batch_size=batchsize,validation_every_steps=300,
+                                learning_rate=0.005,num_epochs=100, loss_fn = dice.DiceLoss("multilabel",classes))
 
 #%% plot loss
