@@ -18,11 +18,13 @@ model.cpu()
 #%%
 #model = vae.cpu()
 # Load testdata
-data_path = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\test_data"
+#data_path = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\test_data"
 
 
-
-test_data = CarDataset(data_path,changelabel=True)
+model = unet
+model.to("cpu")
+model.eval()
+test_data = CarDataset(test_folder,changelabel=True)
 test_loader = DataLoader(dataset=test_data, batch_size=1)
 
 
@@ -31,11 +33,16 @@ test_loader = DataLoader(dataset=test_data, batch_size=1)
 dicecoeffs = []
 for inputs,targets in test_loader:
     pred = model(inputs)
-    plot_things(inputs,targets,pred,idx=0)
-    pred = torch.argmax(pred, dim = 1)
-    targets = torch.argmax(targets,dim=1)
-    # divide pred by 7 so all values are between 0 and 1
-    dicecoeffs.append(soft_dice_score(pred/7,targets).item())
+    y_pred = F.one_hot(torch.argmax(pred, dim = 1),9)
+    y_pred = y_pred.permute(0, 3, 1, 2)
+    dice_score = []
+    for i,carpart in enumerate(targets[0]): #only if batchsize = 1. # loops over carparts in targets[0]
+        dice_score_eachpart = soft_dice_score(y_pred[0][i],carpart)
+        print("part ",i," with dice ",dice_score_eachpart.item())
+        dice_score.append(dice_score_eachpart)
+    dice_score = torch.stack(dice_score,0).mean()
+    print("mean dice ",dice_score.item())
+    dicecoeffs.append(dice_score)
     
     
-print(np.mean(dicecoeffs))
+print("overall mean ", np.mean(dicecoeffs))
