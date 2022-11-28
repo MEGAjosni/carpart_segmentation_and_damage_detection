@@ -18,7 +18,7 @@ elif user == 'Jonas':
     folder = 'hej'
 
 
-imagewidth = 128
+#imagewidth = 256
 
 class CarDataset(Dataset):
     
@@ -40,7 +40,7 @@ class CarDataset(Dataset):
         data = np.load(filename, allow_pickle = True)
         
         label = self.transform_segmentation_mask(9,data[3:])
-        label[0] = (label[0]-1)*(-1) #invert background
+        label[0] = (label[0]-1)*(-1) if self.changelabel else label[0]#invert background
         data = np.concatenate((data[:3],label),axis=0)
             
         data = torch.tensor(data)
@@ -56,7 +56,7 @@ class CarDataset(Dataset):
                 mask[0] += segmentation*(i+1)
             label= mask
         
-        label[0] = (label[0]-1)*(-1)
+        label[0] = (label[0]-1)*(-1) if self.changelabel else label[0]
         return image, label.round().int()
     
     
@@ -71,13 +71,13 @@ class CarDataset(Dataset):
             mask[carpart][label[0] == carpart] = 1.0
         return mask
     
-augmentations = transforms.Compose([transforms.Resize(size = imagewidth),
+augmentations = transforms.Compose([#transforms.Resize(size = imagewidth),
                                     transforms.RandomHorizontalFlip(p=0.5),
-                                    transforms.RandomRotation((-45,45)),
+                                    transforms.RandomRotation((-30,30)),
                                     ])
 dataset = CarDataset(directory = folder, transform = augmentations,changelabel = True)
 
-batchsize = 10
+batchsize = 3
 
 dataloader = DataLoader(dataset=dataset, batch_size=batchsize,shuffle=True)
 dataiter = iter(dataloader)
@@ -88,8 +88,8 @@ images,labels = next(dataiter)
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 #%%#%% Visuallization
-idx = 8
-carpart =0
+idx = 2
+carpart = 0
 
 def plot_things(images,labels,predictions = [], idx = 0, carpart = all):
     image = images[idx].permute(1,2,0)
@@ -100,21 +100,21 @@ def plot_things(images,labels,predictions = [], idx = 0, carpart = all):
     fig, axs = plt.subplots(1,n, sharey='row',
                         gridspec_kw={'hspace': 0, 'wspace': 0})
     
-    axs[0].imshow(image.detach().cpu().numpy())
+    axs[0].imshow(image.numpy())
     axs[0].set_title('Image')
-    axs[1].imshow(label.detach().cpu().numpy(),cmap = "gray")
+    axs[1].imshow(label,cmap = "gray")
     axs[1].set_title('Ground truth')
     axs[0].set_axis_off()
     axs[1].set_axis_off()
     if n > 2:
         prediction = predictions[idx]
         prediction = torch.argmax(prediction,dim = 0) if carpart == all else prediction[carpart,:,:]
-        axs[2].imshow(prediction.detach().cpu().numpy(),cmap = "gray")
+        axs[2].imshow(prediction.detach().numpy(),cmap = "gray")
         axs[2].set_title('Prediction')
         axs[2].set_axis_off()
     plt.show()
 
-plot_things(images,labels,idx = idx, carpart =all)
+plot_things(images,labels,idx = idx, carpart =carpart)
 
 
 

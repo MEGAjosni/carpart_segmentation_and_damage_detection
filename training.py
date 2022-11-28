@@ -16,6 +16,7 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from pytorch_toolbelt.losses import dice
 from pytorch_toolbelt.losses.functional import soft_dice_score
+from dicelossJAM import DiceLossJAM
 
 classes = torch.arange(0,8)
 
@@ -32,6 +33,7 @@ elif user == 'Alek':
     save_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning"
 elif user == 'Jonas':
     folder = 'hej'
+    
 
 #%% Training
 
@@ -121,30 +123,13 @@ def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=6
     print("Finished training.")
  
     
-#%% define VAE
-import torchvision.transforms as transforms
 
-batchsize = 16
-imagewidth = 128
-augmentations_train = transforms.Compose([transforms.Resize(size = imagewidth),
-                                    transforms.RandomRotation((0,180)),
-                                    transforms.RandomHorizontalFlip(p=0.5),
-                                    ])
 
-augmentations_val = transforms.Compose([transforms.Resize(size = imagewidth),
-                                    ])
-vae = VAE_v2(out_channels=1)
-vae.double()
-train_set = CarDataset(directory=train_folder, transform = augmentations_train, changelabel=False)
-val_set = CarDataset(directory=val_folder,transform = augmentations_val,changelabel=False)
-
-train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
-val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 #%% define UNet
 import torchvision.transforms as transforms
 
-batchsize = 10
+batchsize = 8
 unet = UNet(out_channels=9)
 unet.double()
 
@@ -163,8 +148,9 @@ val_set = CarDataset(directory=val_folder,transform = augmentations_train,change
 train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
+
 #%%
 train_loss, val_loss = train_NN(model=unet,train_loader=train_loader,val_loader=val_loader,save_file='unet',batch_size=batchsize,validation_every_steps=300,
-                                learning_rate=0.005,num_epochs=100, loss_fn = dice.DiceLoss("multilabel",classes))
+                                learning_rate=0.005,num_epochs=20, loss_fn = DiceLossJAM())#dice.DiceLoss("multilabel",classes))
 
 #%% plot loss
