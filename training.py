@@ -18,29 +18,14 @@ from pytorch_toolbelt.losses import dice
 from pytorch_toolbelt.losses.functional import soft_dice_score
 from dicelossJAM import DiceLossJAM
 
+from userpaths import *
+
+
 classes = torch.arange(0,8)
-
-user = 'Jonas'
-
-if user == 'Marcus':
-    train_folder = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
-    test_folder = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\test_data"
-    val_folder = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\validation_data"
-elif user == 'Alek':
-    train_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\train_data"
-    test_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\test_data"
-    val_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\validation_data"
-    save_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning"
-elif user == 'Jonas':
-    train_folder = r'C:\Users\jonas\OneDrive\Desktop\DeepLearningProject\data\clean_data\train_data'
-    test_folder = r'C:\Users\jonas\OneDrive\Desktop\DeepLearningProject\data\clean_data\test_data'
-    val_folder = r'C:\Users\jonas\OneDrive\Desktop\DeepLearningProject\data\clean_data\validation_data'
-    save_folder = r'C:\Users\jonas\OneDrive\Desktop\DeepLearningProject\models'
-    
 
 #%% Training
 
-def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=64, num_epochs=20, validation_every_steps=500, learning_rate=0.001, loss_fn=nn.BCEWithLogitsLoss()):
+def train_NN(model, train_loader, val_loader, save_folder='', save_file='untitled', batch_size=64, num_epochs=20, validation_every_steps=500, learning_rate=0.001, loss_fn=nn.BCEWithLogitsLoss()):
 
     loss_fn.double()
     
@@ -108,17 +93,13 @@ def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=6
                 print(f"Step {step:<5}   training loss: {batch_loss.item()}")
                 print(f"             val loss: {loss.item()}")
     
-    # Save model
-    #path_models = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models')
-    path_models = save_folder
-    
     suffix = ''
     index = 0
-    while save_file + suffix + '.pt' in os.listdir(path_models):
+    while save_file + suffix + '.pt' in os.listdir(model_saves):
         suffix = '_' + str(index)
         index += 1
-        
-    torch.save(model, os.path.join(path_models, save_file + suffix + '.pt'))
+    
+    torch.save(model, os.path.join(model_saves, save_file + suffix + '.pt'))
     
     return train_loss, val_loss
         
@@ -146,7 +127,7 @@ augmentations_val = transforms.Compose([transforms.Resize(size = imagewidth),
                                     ])
 
 train_set = CarDataset(directory=train_folder, subfolders=True, relations=[0,0,0,1],transform = augmentations_train,changelabel=True)
-val_set = CarDataset(directory=val_folder,transform = augmentations_train,changelabel=True)
+val_set = CarDataset(directory=validation_folder,transform = augmentations_train,changelabel=True)
 
 train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)

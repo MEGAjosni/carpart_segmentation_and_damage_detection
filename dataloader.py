@@ -1,4 +1,3 @@
-
 import torch
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
@@ -8,19 +7,10 @@ import torchvision.transforms as transforms
 import torch.nn.functional as F
 import random
 
-
-user = 'Marcus'
-
-if user == 'Marcus':
-    folder  = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
-elif user == 'Alek':
-    folder  = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\train_data"
-elif user == 'Jonas':
-    folder = 'hej'
-
+# Fix error at marcus pc
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 #imagewidth = 256
-
 class CarDataset(Dataset):
     
     def __init__(self, directory, transform = None, changelabel = None, subfolders=False, relations=None):
@@ -147,26 +137,20 @@ class CarDataset(Dataset):
             carpart = int(carpart)
             mask[carpart][label[0] == carpart] = 1.0
         return mask
-'''
-augmentations = transforms.Compose([#transforms.Resize(size = imagewidth),
-                                    transforms.RandomHorizontalFlip(p=0.5),
-                                    transforms.RandomRotation((-30,30)),
-                                    ])
-dataset = CarDataset(directory = folder, transform = augmentations,changelabel = True)
-
-batchsize = 3
-
-dataloader = DataLoader(dataset=dataset, batch_size=batchsize,shuffle=True)
-dataiter = iter(dataloader)
-
-images,labels = next(dataiter)
-'''
-#%% fix error at marcus pc
-import os
-os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
-#%%#%% Visuallization
-idx = 2
-carpart = 0
+    '''
+    augmentations = transforms.Compose([#transforms.Resize(size = imagewidth),
+                                        transforms.RandomHorizontalFlip(p=0.5),
+                                        transforms.RandomRotation((-30,30)),
+                                        ])
+    dataset = CarDataset(directory = folder, transform = augmentations,changelabel = True)
+    
+    batchsize = 3
+    
+    dataloader = DataLoader(dataset=dataset, batch_size=batchsize,shuffle=True)
+    dataiter = iter(dataloader)
+    
+    images,labels = next(dataiter)
+    '''
 
 def plot_things(images,labels,predictions = [], idx = 0, carpart = all):
     image = images[idx].permute(1,2,0)
@@ -190,9 +174,3 @@ def plot_things(images,labels,predictions = [], idx = 0, carpart = all):
         axs[2].set_title('Prediction')
         axs[2].set_axis_off()
     plt.show()
-
-# plot_things(images,labels,idx = idx, carpart =carpart)
-
-
-
-

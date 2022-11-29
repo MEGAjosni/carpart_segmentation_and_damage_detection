@@ -4,10 +4,10 @@ import os
 from time import sleep
 import torch
 
-folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\train_data\\"
+from userpaths import train_folder
 
-for filename in os.listdir(folder):
-    arr = np.load(folder+filename)
+for filename in os.listdir(os.path.join(train_folder, 'photo')):
+    arr = np.load(os.path.join(train_folder, 'photo', filename))
     
     fig, axs = plt.subplots(2, 2,sharex='col', sharey='row',
                         gridspec_kw={'hspace': 0, 'wspace': 0})

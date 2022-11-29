@@ -7,22 +7,10 @@ from unet import Unet
 from utils import init_weights,init_weights_orthogonal_normal, l2_regularisation
 import torch.nn.functional as F
 from torch.distributions import Normal, Independent, kl
+from userpaths import *
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-user = 'Alek'
-
-if user == 'Marcus':
-    train_folder = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\train_data"
-    test_folder = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\test_data"
-    val_folder = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\clean_data\validation_data"
-elif user == 'Alek':
-    train_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\train_data"
-    test_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\test_data"
-    val_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\validation_data"
-    save_folder = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning"
-elif user == 'Jonas':
-    folder = 'hej'
 
 class Encoder(nn.Module):
     """
@@ -65,6 +53,7 @@ class Encoder(nn.Module):
     def forward(self, input):
         output = self.layers(input)
         return output
+
 
 class AxisAlignedConvGaussian(nn.Module):
     """
