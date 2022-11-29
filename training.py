@@ -46,7 +46,7 @@ def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=6
     
     device = "cpu"
     if torch.cuda.is_available():
-        device = "cuda:0"  
+        device = "cuda:0"
         
     print(device)
         
@@ -110,7 +110,7 @@ def train_NN(model, train_loader, val_loader, save_file='untitled', batch_size=6
     
     # Save model
     #path_models = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models')
-    path_models = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning"
+    path_models = save_folder
     
     suffix = ''
     index = 0

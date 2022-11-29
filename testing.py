@@ -5,28 +5,29 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 from pytorch_toolbelt.losses.functional import soft_dice_score
 import numpy as np
-
+import torch.nn.functional as F
 
 #%%
 # Get path of model savefile
-model_savefile = 'mode.pth'
+model_savefile = 'unet_only_photo.pt'
 path = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\\"
 path = r"C:\Users\Marcu\OneDrive - Danmarks Tekniske Universitet\DTU\Kandidat\1. Semester\Deep Learning\carpart_segmentation_and_damage_detection\\"
+path = r'C:\Users\jonas\OneDrive\Desktop\DeepLearningProject\models'
 # Load model
-model = UNet()
-model.load_state_dict(torch.load(path+model_savefile))
-model = torch.load(path+model_savefile)
+#model = UNet()
+#model.load_state_dict(torch.load(path+model_savefile))
+model = torch.load(os.path.join(path, model_savefile))
 #%%
 #model = vae.cpu()
 # Load testdata
-#data_path = r"C:\Users\aleks\OneDrive\Skole\DTU\7. Semester\Deep Learning\clean_data\test_data"
+data_path = r"C:\Users\jonas\OneDrive\Desktop\DeepLearningProject\data\clean_data\test_data"
 
 
 batchsize = 3
-model = unet
+#model = unet
 model.to("cpu")
 model.eval()
-test_data = CarDataset(test_folder,changelabel=True)
+test_data = CarDataset(data_path,changelabel=True)
 test_loader = DataLoader(dataset=test_data, batch_size=batchsize)
 
 
