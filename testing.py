@@ -36,10 +36,10 @@ for inputs,targets in test_loader:
     y_pred = y_pred.permute(0, 3, 1, 2)
     targets = targets.view(batchsize, 9, -1)
     y_pred = y_pred.view(batchsize, 9, -1)
-    dice_score = soft_dice_score(y_pred,targets,dims = 2)
+    dice_score = soft_dice_score(y_pred,targets,dims = 2, smooth = 1.0)
     print("total dice :\n",dice_score)
     print("mean dice :\n",dice_score.mean())
     dicecoeffs.append(dice_score)
     
     
-print("overall mean ", np.mean(np.array(dicecoeffs)))
+print("overall mean ", torch.stack(dicecoeffs,0).mean())
