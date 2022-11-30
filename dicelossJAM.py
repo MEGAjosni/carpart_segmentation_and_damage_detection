@@ -29,7 +29,7 @@ class DiceLossJAM(_Loss):
         self,
         classes: List[int] = None,
         log_loss=False,
-        from_logits=True,
+        from_logits=False,
         smooth: float = 0.0,
         ignore_index=None,
         weights = None,

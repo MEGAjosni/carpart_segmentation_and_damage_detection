@@ -22,7 +22,6 @@ model = torch.load(os.path.join(model_saves, model_savefile))
 # Load testdata
 
 batchsize = 3
-#model = unet
 model.to("cpu")
 model.eval()
 test_data = CarDataset(test_folder,changelabel=True)
@@ -35,14 +34,12 @@ for inputs,targets in test_loader:
     pred = model(inputs)
     y_pred = F.one_hot(torch.argmax(pred, dim = 1),9)
     y_pred = y_pred.permute(0, 3, 1, 2)
-    dice_score = torch.tensor([])
-    for batch in range(batchsize):
-        for i,carpart in enumerate(targets[batch]): #only if batchsize = 1. # loops over carparts in targets[0]
-            dice_score_eachpart = soft_dice_score(y_pred[batch][i],carpart)
-            print("part ",i," with dice ",dice_score_eachpart.item())
-            dice_score = torch.cat((dice_score, torch.tensor([dice_score_eachpart])), 0)
-    print("mean dice ",dice_score.mean())
+    targets = targets.view(batchsize, 9, -1)
+    y_pred = y_pred.view(batchsize, 9, -1)
+    dice_score = soft_dice_score(y_pred,targets,dims = 2)
+    print("total dice :\n",dice_score)
+    print("mean dice :\n",dice_score.mean())
     dicecoeffs.append(dice_score)
     
     
-print("overall mean ", np.mean(dicecoeffs))
+print("overall mean ", np.mean(np.array(dicecoeffs)))
