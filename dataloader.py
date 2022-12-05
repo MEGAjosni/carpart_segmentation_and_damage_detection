@@ -13,7 +13,13 @@ os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 #imagewidth = 256
 class CarDataset(Dataset):
     
-    def __init__(self, directory, transform = None, changelabel = None, subfolders=False, relations=None):
+    def __init__(self, directory, 
+                 transform = None, 
+                 changelabel = None, 
+                 subfolders=False, 
+                 relations=None,
+                 colorjit = False,
+                 ):
         '''
         Description
         -----------
@@ -100,6 +106,7 @@ class CarDataset(Dataset):
         
         self.transform = transform
         self.changelabel = changelabel
+        self.colorjit = transforms.ColorJitter(brightness=.5, hue=.3) if colorjit else False
     
     def __getitem__(self, index):
         # dataset[]
@@ -109,13 +116,19 @@ class CarDataset(Dataset):
         label = self.transform_segmentation_mask(9,data[3:])
         label[0] = (label[0]-1)*(-1) if self.changelabel else label[0]#invert background
         data = np.concatenate((data[:3],label),axis=0)
-            
+        
+        
+        
         data = torch.tensor(data)
-        if self.transform:
+        
+        if self.transform: #transform data
             data = self.transform(data)
             
         image = data[:3]
         label = data[3:]
+        
+        if self.colorjit != False:
+            image = self.colorjit(image)
         
         if not self.changelabel:
             mask = torch.zeros(1,label.shape[1],label.shape[2])
@@ -123,7 +136,7 @@ class CarDataset(Dataset):
                 mask[0] += segmentation*(i+1)
             label= mask
         
-        label[0] = (label[0]-1)*(-1) if self.changelabel else label[0]
+        label[0] = (label[0]-1)*(-1) if self.changelabel else label[0] #invert background back
         return image, label.round().int()
     
     
@@ -137,20 +150,7 @@ class CarDataset(Dataset):
             carpart = int(carpart)
             mask[carpart][label[0] == carpart] = 1.0
         return mask
-    '''
-    augmentations = transforms.Compose([#transforms.Resize(size = imagewidth),
-                                        transforms.RandomHorizontalFlip(p=0.5),
-                                        transforms.RandomRotation((-30,30)),
-                                        ])
-    dataset = CarDataset(directory = folder, transform = augmentations,changelabel = True)
     
-    batchsize = 3
-    
-    dataloader = DataLoader(dataset=dataset, batch_size=batchsize,shuffle=True)
-    dataiter = iter(dataloader)
-    
-    images,labels = next(dataiter)
-    '''
 
 def plot_things(images,labels,predictions = [], idx = 0, carpart = all):
     image = images[idx].permute(1,2,0)
@@ -161,16 +161,31 @@ def plot_things(images,labels,predictions = [], idx = 0, carpart = all):
     fig, axs = plt.subplots(1,n, sharey='row',
                         gridspec_kw={'hspace': 0, 'wspace': 0})
     
-    axs[0].imshow(image.numpy())
+    axs[0].imshow(image.cpu().numpy())
     axs[0].set_title('Image')
-    axs[1].imshow(label,cmap = "gray")
+    axs[1].imshow(label.cpu(),cmap = "gray")
     axs[1].set_title('Ground truth')
     axs[0].set_axis_off()
     axs[1].set_axis_off()
     if n > 2:
         prediction = predictions[idx]
         prediction = torch.argmax(prediction,dim = 0) if carpart == all else prediction[carpart,:,:]
-        axs[2].imshow(prediction.detach().numpy(),cmap = "gray")
+        axs[2].imshow(prediction.cpu(),cmap = "gray")
         axs[2].set_title('Prediction')
         axs[2].set_axis_off()
     plt.show()
+
+#%%
+    
+augmentations = transforms.Compose([#transforms.Resize(size = imagewidth),
+                                    transforms.RandomHorizontalFlip(p=0.5),
+                                    transforms.RandomRotation((-30,30)),
+                                    ])
+dataset = CarDataset(directory = folder,changelabel = True, colorjit = True)
+
+batchsize = 3
+
+dataloader = DataLoader(dataset=dataset, batch_size=batchsize,shuffle=True)
+dataiter = iter(dataloader)
+
+images,labels = next(dataiter)
