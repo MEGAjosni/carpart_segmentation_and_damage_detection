@@ -6,20 +6,22 @@ import torchvision.transforms as transforms
 from pytorch_toolbelt.losses.functional import soft_dice_score
 import numpy as np
 import torch.nn.functional as F
-
 from userpaths import test_folder, model_saves
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 #%%
 # Get path of model savefile
-model_savefile = 'unet_only_photo.pt'
+model_savefile = 'unet_crossentropy'
 
 # Load model
-#model = UNet()
-#model.load_state_dict(torch.load(path+model_savefile))
-model = torch.load(os.path.join(model_saves, model_savefile))
+model = UNet()
+model.load_state_dict(torch.load(model_savefile))
+#model = torch.load(os.path.join(model_saves, model_savefile))
+model.double()
 #%%
 #model = vae.cpu()
 # Load testdata
+
 
 batchsize = 3
 model.to("cpu")
@@ -36,7 +38,7 @@ for inputs,targets in test_loader:
     y_pred = y_pred.permute(0, 3, 1, 2)
     targets = targets.view(batchsize, 9, -1)
     y_pred = y_pred.view(batchsize, 9, -1)
-    dice_score = soft_dice_score(y_pred,targets,dims = 2, smooth = 1.0)
+    dice_score = soft_dice_score(y_pred,targets)
     print("total dice :\n",dice_score)
     print("mean dice :\n",dice_score.mean())
     dicecoeffs.append(dice_score)
