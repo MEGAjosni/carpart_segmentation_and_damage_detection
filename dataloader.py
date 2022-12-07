@@ -106,7 +106,7 @@ class CarDataset(Dataset):
         
         self.transform = transform
         self.changelabel = changelabel
-        self.colorjit = transforms.ColorJitter(brightness=.5, hue=.3) if colorjit else False
+        self.colorjit = transforms.ColorJitter(brightness=.5, hue=.3,contrast=.5) if colorjit else False
     
     def __getitem__(self, index):
         # dataset[]
@@ -176,16 +176,16 @@ def plot_things(images,labels,predictions = [], idx = 0, carpart = all):
     plt.show()
 
 #%%
-    
+"""
 augmentations = transforms.Compose([#transforms.Resize(size = imagewidth),
                                     transforms.RandomHorizontalFlip(p=0.5),
                                     transforms.RandomRotation((-30,30)),
                                     ])
-dataset = CarDataset(directory = folder,changelabel = True, colorjit = True)
+#dataset = CarDataset(directory = folder,changelabel = True, colorjit = True)
 
 batchsize = 3
 
 dataloader = DataLoader(dataset=dataset, batch_size=batchsize,shuffle=True)
 dataiter = iter(dataloader)
 
-images,labels = next(dataiter)
+images,labels = next(dataiter)"""

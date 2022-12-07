@@ -81,7 +81,7 @@ class DiceLossJAM(_Loss):
     
         y_true = y_true.view(bs, num_classes, -1)
         y_pred = y_pred.view(bs, num_classes, -1)
-        dims = 2
+        dims = (0,2)
         scores = soft_dice_score(y_pred, y_true.type_as(y_pred), smooth=self.smooth, eps=self.eps, dims=dims)
 
         if self.weights is not None:

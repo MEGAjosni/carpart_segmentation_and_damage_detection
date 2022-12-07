@@ -17,11 +17,11 @@ import matplotlib.pyplot as plt
 from pytorch_toolbelt.losses import dice
 from pytorch_toolbelt.losses.functional import soft_dice_score
 from dicelossJAM import DiceLossJAM
-
 from userpaths import *
 
 
 classes = torch.arange(0,8)
+weights = torch.tensor([0.2,1,1,1,1,1,1,1,1])
 
 #%% Training
 
@@ -54,7 +54,7 @@ def train_NN(model, train_loader, val_loader, save_folder='', save_file='untitle
             
             # Forward pass, compute gradients, perform one training step.
             output = model(inputs)
-            batch_loss = loss_fn(output, targets.long())
+            batch_loss = loss_fn(output, targets.float())
             optimizer.zero_grad()
             batch_loss.backward()
             optimizer.step()
@@ -74,7 +74,7 @@ def train_NN(model, train_loader, val_loader, save_folder='', save_file='untitle
                     for inputs, targets in val_loader:
                         inputs, targets = inputs.to(device), targets.to(device)
                         output = model(inputs)
-                        loss = loss_fn(output, targets.long())
+                        loss = loss_fn(output, targets.float())
                         #accuracy
                         y_pred = F.one_hot(torch.argmax(output, dim = 1),9)
                         y_pred = y_pred.permute(0, 3, 1, 2)
@@ -120,21 +120,21 @@ unet.double()
 imagewidth = 256
 augmentations_train = transforms.Compose([#transforms.Resize(size = imagewidth),
                                     transforms.RandomRotation((-30,30)),
-                                    transforms.RandomHorizontalFlip(p=0.5),
+                                    #transforms.RandomHorizontalFlip(p=0.5),
                                     ])
 
 augmentations_val = transforms.Compose([transforms.Resize(size = imagewidth),
                                     ])
 
-train_set = CarDataset(directory=train_folder, subfolders=True, relations=[0,0,0,1],transform = augmentations_train,changelabel=True)
-val_set = CarDataset(directory=validation_folder,transform = augmentations_train,changelabel=True)
+train_set = CarDataset(directory=train_folder, subfolders=True, relations=None,transform = None,changelabel=True,colorjit=True)
+val_set = CarDataset(directory=validation_folder,transform = None,changelabel=True)
 
 train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 
 #%%
-train_loss, val_loss = train_NN(model=unet,train_loader=train_loader,val_loader=val_loader,save_file='unet_only_photo',batch_size=batchsize,validation_every_steps=300,
-                                learning_rate=0.005,num_epochs=20, loss_fn = DiceLossJAM())#dice.DiceLoss("multilabel",classes))
+train_loss, val_loss = train_NN(model=unet,train_loader=train_loader,val_loader=val_loader,save_file='unet_colorjit2',batch_size=batchsize,validation_every_steps=300,
+                                learning_rate=0.005,num_epochs=20, loss_fn = dice.DiceLoss("multilabel",classes, from_logits=False,smooth=1.0))
 
 #%% plot loss

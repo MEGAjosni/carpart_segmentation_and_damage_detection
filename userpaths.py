@@ -24,7 +24,7 @@ marcus_paths = {
 userpaths = {
     'jonas': jonas_paths,
     'Marcu': marcus_paths,
-    'Alek': alek_paths
+    'aleks': alek_paths
     }
 
 user = os.getlogin()
