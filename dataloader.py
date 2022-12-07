@@ -152,29 +152,42 @@ class CarDataset(Dataset):
         return mask
     
 
-def plot_things(images,labels,predictions = [], modelnames = [],idx = 0, carpart = all):
-    image = images[idx].permute(1,2,0)
-    label = labels[idx]
-    label = torch.argmax(label,dim = 0) if carpart == all else label[carpart,:,:]
-    
-    n = len(predictions)+2 if len(predictions) > 0 else 2
-    fig, axs = plt.subplots(1,n, sharey='row',
-                        gridspec_kw={'hspace': 0, 'wspace': 0})
-    
-    axs[0].imshow(image.cpu().numpy())
-    axs[0].set_title('Image')
-    axs[1].imshow(label.cpu(),cmap = "gray")
-    axs[1].set_title('Ground truth')
-    axs[0].set_axis_off()
-    axs[1].set_axis_off()
-    if n > 2:
-        for i in range(n-2):
-            prediction = predictions[i][idx] if type(predictions) == list else predictions[idx]
-            prediction = torch.argmax(prediction,dim = 0) if carpart == all else prediction[carpart,:,:]
-            axs[i+2].imshow(prediction.cpu(),cmap = "gray")
-            modelname = modelnames[i] if len(modelnames) > 0 else 'Prediction '+str(i+1)
-            axs[i+2].set_title(modelname)
-            axs[i+2].set_axis_off()
+
+def plot_things(images,labels,predictions = [], modelnames = [],idx = [0], carpart = all, invert = False, dicescores = [], imgidx = ''):
+
+    m = len(predictions)+2 if len(predictions) > 0 else 2
+    n = len(idx)
+    fig, axs = plt.subplots(n,m)
+    axs = axs.reshape(n,m)
+    if m > 2:
+        for i in range(n):
+            image = images[idx[i]].permute(1,2,0)
+            label = labels[idx[i]]
+            label = torch.argmax(label,dim = 0) if carpart == all else label[carpart,:,:]
+            label = (label-8)*(-1) if invert else label
+            
+            axs[i,0].imshow(image.cpu().numpy())
+            axs[i,1].imshow(label.cpu(),cmap = "gray")
+
+            axs[i,0].set_axis_off()
+            axs[i,1].set_axis_off()
+            for j in range(m-2):
+                prediction = predictions[j][idx[i]] if type(predictions) == list else predictions[idx[i]]
+                prediction = torch.argmax(prediction,dim = 0) if carpart == all else prediction[carpart,:,:]
+                prediction = (prediction-8)*(-1) if invert else prediction
+                axs[i,j+2].imshow(prediction.cpu(),cmap = "gray")
+                #axs[i,j+2].legend("Dice: "+str(round(dicescores[i,j].item(),2)),loc = 'lower center')
+                if len(dicescores) > 0:
+                    axs[i,j+2].text(20, 275, "Dice: "+str(round(dicescores[i,j].item(),2)), bbox={'facecolor': 'white', 'pad': 2})
+
+
+                modelname = modelnames[j] if len(modelnames) > 0 else 'Prediction '+str(j+1)
+                axs[0,j+2].set_title(modelname)
+                axs[i,j+2].set_axis_off()
+                
+    axs[0,0].set_title('Image'+str(imgidx))
+    axs[0,1].set_title('Ground truth')
+    fig.subplots_adjust(wspace = 0)
     plt.show()
 
 #%%
