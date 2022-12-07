@@ -14,7 +14,7 @@ import numpy as np
 from tqdm import tqdm
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
-from pytorch_toolbelt.losses import dice
+from pytorch_toolbelt.losses import dice, DiceLoss
 from pytorch_toolbelt.losses.functional import soft_dice_score
 from dicelossJAM import DiceLossJAM
 
@@ -50,11 +50,11 @@ def train_NN(model, train_loader, val_loader, save_folder='', save_file='untitle
         
         for inputs, targets in tqdm(train_loader):
             #print(max(targets.unique()))
-            inputs, targets = inputs.to(device), targets.to(device)
+            inputs, targets = inputs.to(device), targets.to(device).float()
             
             # Forward pass, compute gradients, perform one training step.
             output = model(inputs)
-            batch_loss = loss_fn(output, targets.long())
+            batch_loss = loss_fn(output, targets)
             optimizer.zero_grad()
             batch_loss.backward()
             optimizer.step()
@@ -72,9 +72,9 @@ def train_NN(model, train_loader, val_loader, save_folder='', save_file='untitle
                 with torch.no_grad():
                     model.eval()
                     for inputs, targets in val_loader:
-                        inputs, targets = inputs.to(device), targets.to(device)
+                        inputs, targets = inputs.to(device), targets.to(device).float()
                         output = model(inputs)
-                        loss = loss_fn(output, targets.long())
+                        loss = loss_fn(output, targets)
                         #accuracy
                         y_pred = F.one_hot(torch.argmax(output, dim = 1),9)
                         y_pred = y_pred.permute(0, 3, 1, 2)
@@ -114,27 +114,34 @@ def train_NN(model, train_loader, val_loader, save_folder='', save_file='untitle
 import torchvision.transforms as transforms
 
 batchsize = 8
-unet = UNet(out_channels=9)
-unet.double()
+#unet = UNet(out_channels=9)
+unet2 = UNet2()
+unet2.double()
 
 imagewidth = 256
 augmentations_train = transforms.Compose([#transforms.Resize(size = imagewidth),
+                                    #transforms.ColorJitter(brightness=.5, hue=.3),
                                     transforms.RandomRotation((-30,30)),
                                     transforms.RandomHorizontalFlip(p=0.5),
+                                    
                                     ])
 
 augmentations_val = transforms.Compose([transforms.Resize(size = imagewidth),
                                     ])
 
-train_set = CarDataset(directory=train_folder, subfolders=True, relations=[0,0,0,1],transform = augmentations_train,changelabel=True)
+train_set = CarDataset(directory=train_folder, subfolders=False, relations=[0,0,0,1],transform = augmentations_train,changelabel=True, colorjit = True)
 val_set = CarDataset(directory=validation_folder,transform = augmentations_train,changelabel=True)
 
 train_loader = DataLoader(dataset=train_set, batch_size=batchsize, shuffle=True)
 val_loader = DataLoader(dataset=val_set, batch_size=batchsize, shuffle=True)
 
 
+#%% weighted Unet
+weight = torch.tensor([1,2,10,10,10,10,10,10,10]).float().to(device)
+
+
 #%%
-train_loss, val_loss = train_NN(model=unet,train_loader=train_loader,val_loader=val_loader,save_file='unet_only_photo',batch_size=batchsize,validation_every_steps=300,
-                                learning_rate=0.005,num_epochs=20, loss_fn = DiceLossJAM())#dice.DiceLoss("multilabel",classes))
+train_loss, val_loss = train_NN(model=unet2,train_loader=train_loader,val_loader=val_loader,save_file='unet_only_photo',batch_size=batchsize,validation_every_steps=200,
+                                learning_rate=0.005,num_epochs=20, loss_fn = DiceLoss("multilabel", from_logits = False, smooth = 1.0))
 
 #%% plot loss

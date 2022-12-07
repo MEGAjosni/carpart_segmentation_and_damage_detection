@@ -152,12 +152,12 @@ class CarDataset(Dataset):
         return mask
     
 
-def plot_things(images,labels,predictions = [], idx = 0, carpart = all):
+def plot_things(images,labels,predictions = [], modelnames = [],idx = 0, carpart = all):
     image = images[idx].permute(1,2,0)
     label = labels[idx]
     label = torch.argmax(label,dim = 0) if carpart == all else label[carpart,:,:]
     
-    n = 3 if len(predictions) > 0 else 2
+    n = len(predictions)+2 if len(predictions) > 0 else 2
     fig, axs = plt.subplots(1,n, sharey='row',
                         gridspec_kw={'hspace': 0, 'wspace': 0})
     
@@ -168,14 +168,17 @@ def plot_things(images,labels,predictions = [], idx = 0, carpart = all):
     axs[0].set_axis_off()
     axs[1].set_axis_off()
     if n > 2:
-        prediction = predictions[idx]
-        prediction = torch.argmax(prediction,dim = 0) if carpart == all else prediction[carpart,:,:]
-        axs[2].imshow(prediction.cpu(),cmap = "gray")
-        axs[2].set_title('Prediction')
-        axs[2].set_axis_off()
+        for i in range(n-2):
+            prediction = predictions[i][idx] if type(predictions) == list else predictions[idx]
+            prediction = torch.argmax(prediction,dim = 0) if carpart == all else prediction[carpart,:,:]
+            axs[i+2].imshow(prediction.cpu(),cmap = "gray")
+            modelname = modelnames[i] if len(modelnames) > 0 else 'Prediction '+str(i+1)
+            axs[i+2].set_title(modelname)
+            axs[i+2].set_axis_off()
     plt.show()
 
 #%%
+'''
     
 augmentations = transforms.Compose([#transforms.Resize(size = imagewidth),
                                     transforms.RandomHorizontalFlip(p=0.5),
@@ -189,3 +192,4 @@ dataloader = DataLoader(dataset=dataset, batch_size=batchsize,shuffle=True)
 dataiter = iter(dataloader)
 
 images,labels = next(dataiter)
+'''

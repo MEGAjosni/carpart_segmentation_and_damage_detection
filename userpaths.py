@@ -23,7 +23,8 @@ marcus_paths = {
 
 userpaths = {
     'jonas': jonas_paths,
-    'Marcu': marcus_paths,
+    'Marcus': marcus_paths,
+    'Marcu' : marcus_paths,
     'Alek': alek_paths
     }
 
