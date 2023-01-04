@@ -11,10 +11,10 @@ import numpy as np
 
 
 batchsize = 8
-test_data = CarDataset(test_folder,changelabel=True)
+test_data = CarDataset("test_data", changelabel=True)
 test_loader = DataLoader(dataset=test_data, batch_size=batchsize, shuffle = False)
 
-models = [name for name in os.listdir(model_saves) if name[-2:] in ['pt', 'pth']]
+models = [name for name in os.listdir("models") if name[-2:] in ['pt', 'pth']]
 
 print("-"*50)
 for model in models:
